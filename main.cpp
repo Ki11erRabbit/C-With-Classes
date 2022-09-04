@@ -7,10 +7,20 @@
 
 using namespace std;
 
+bool isCType(string line) {
+
+    if (line.find("char") < line.size() || line.find("int") < line.size() || line.find("long") < line.size() ||
+    line.find("short") < line.size() || line.find("float") < line.size() || line.find("double") < line.size() ||
+    line.find("void") < line.size()) {
+        return true;
+    }
+    return false;
+}
 
 vector<string> scanFile(ifstream *in) {
     string line;
     vector<std::string> accumulator;
+    bool function = false;
     while (getline(*in,line)) {
 
         if (line[0] == '#') {
@@ -26,15 +36,31 @@ vector<string> scanFile(ifstream *in) {
             }
         }
         else {
-            string token;
-            stringstream ss(line);
-
-            while (getline(ss,token, ' ')) {
-                if (token == "")
-                    continue;
-
-                accumulator.push_back(token);
+            if (function) {
+                accumulator.push_back(line);
             }
+            if (function && line[line.size() -1 ] == '}') {
+                function = false;
+            }
+            else if (line.find('(') < line.size()) {
+                accumulator.push_back(line);
+                function = true;
+            }
+            else if (isCType(line)) {
+                accumulator.push_back(line);
+            }
+            else if (!function){
+                string token;
+                stringstream ss(line);
+                while (getline(ss,token, ' ')) {
+                    if (token == "")
+                        continue;
+
+                    accumulator.push_back(token);
+                }
+            }
+
+            //accumulator.push_back(line);
         }
     }
     return accumulator;

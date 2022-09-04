@@ -10,11 +10,11 @@
 
 class test {
     int data;
-#if VERBOSE >= 2
+
     int getData() {
         return data;
     }
-#endif
+
     void setData(int data) {
         this->data = data;
     }

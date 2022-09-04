@@ -15,9 +15,12 @@ using namespace std;
 class ClassStructure {
 private:
     string className;
-    vector<string> classData;
+    vector<pair<string,string>> classData;
     vector<MethodStructure> methods;
+    MethodStructure constructor;
+    MethodStructure deconstructor;
     vector<string> preProcs;
+    vector<string> includes;
 
 public:
 
@@ -35,8 +38,8 @@ public:
         stringstream out;
 
         //puts all includes in the headerfile
-        for (auto preProc : preProcs) {
-            out << preProc << endl;
+        for (auto include : includes) {
+            out << include << endl;
         }
         out << endl;
 
@@ -45,6 +48,8 @@ public:
         for (auto data : classData) {
             out << "\t" << data << ";" << endl;
         }
+        out << "\t" << constructor.printPointerForm();
+        out << "\t" << deconstructor.printPointerForm();
         for (auto method : methods) {
             out << "\t" << method.printPointerForm();
         }
@@ -53,6 +58,8 @@ public:
         out << endl;
 
         //outputs function definitions needed for header;
+        out << constructor.printFunctionDef(this) << endl;
+        out << deconstructor.printFunctionDef(this) << endl;
         for (auto method : methods) {
             out << method.printFunctionDef(this) << endl;
         }
@@ -60,6 +67,17 @@ public:
     }
     string buildSource() {
         stringstream out;
+        out << "#include \"" << className << ".h\"" << endl << endl;
+        for (auto preProc : preProcs) {
+            out << preProc << endl;
+        }
+        out << endl;
+
+        out << constructor.printFunctionForm(this) << endl << endl;
+        out << constructor.printFunctionForm(this) << endl << endl;
+        for (auto method : methods) {
+            out << method.printFunctionForm(this) << endl << endl;
+        }
 
     }
     string toString() {
