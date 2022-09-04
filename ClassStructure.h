@@ -17,6 +17,7 @@ private:
     string className;
     vector<string> classData;
     vector<MethodStructure> methods;
+    vector<string> preProcs;
 
 public:
 
@@ -25,9 +26,21 @@ public:
         struct Node* next;
         struct Node* previous;
     } Node;
-    string toString() {
+
+    string getName() const {
+        return className;
+    }
+
+    string buildHeader() {
         stringstream out;
 
+        //puts all includes in the headerfile
+        for (auto preProc : preProcs) {
+            out << preProc << endl;
+        }
+        out << endl;
+
+        //makes the struct needed for the class
         out << "typedef struct " << className << "{" << endl;
         for (auto data : classData) {
             out << "\t" << data << ";" << endl;
@@ -37,6 +50,22 @@ public:
         }
 
         out << "} " << className << ";" << endl;
+        out << endl;
+
+        //outputs function definitions needed for header;
+        for (auto method : methods) {
+            out << method.printFunctionDef(this) << endl;
+        }
+
+    }
+    string buildSource() {
+        stringstream out;
+
+    }
+    string toString() {
+
+
+
 
     }
 

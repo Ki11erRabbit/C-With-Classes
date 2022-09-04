@@ -10,6 +10,7 @@
 #include <sstream>
 
 #include "MethodParameter.h"
+#include "ClassStructure.h"
 
 using namespace std;
 
@@ -22,14 +23,43 @@ private:
 
 public:
 
-    string printPointerForm() {
+    string printPointerForm(ClassStructure classStruct) {
         stringstream out;
         out << type << " (*" << methodName << ")";
+        out << "(" << "struct *" << classStruct.getName() << ", ";
         for (size_t i = 0; i < parameters.size(); i++) {
-            if (i == 0) {
-                out << "(";
-            }
             out << parameters.at(i).getType();
+            if (i < parameters.size() -1) {
+                out << ", ";
+            }
+        }
+        out << ");" << endl;
+    }
+
+    string printFunctionForm(ClassStructure classStruct) {
+        stringstream out;
+
+        out << type << " " << classStruct.getName() << "__" << methodName << "(" << "struct *" << classStruct.getName() << " this, ";
+        for (size_t i = 0; i < parameters.size(); i++) {
+            out << parameters.at(i).getType() << " " << parameters.at(i).getName();
+            if (i < parameters.size() -1) {
+                out << ", ";
+            }
+        }
+        out << ") {" << endl;
+
+        for (auto line : codeBody) {
+            out << line << endl;
+        }
+        out << "}" << endl;
+    }
+
+    string printFunctionDef(ClassStructure classStruct) {
+        stringstream out;
+
+        out << type << " " << classStruct.getName() << "__" << methodName << "(" << "struct *" << classStruct.getName() << " this, ";
+        for (size_t i = 0; i < parameters.size(); i++) {
+            out << parameters.at(i).getType() << " " << parameters.at(i).getName();
             if (i < parameters.size() -1) {
                 out << ", ";
             }

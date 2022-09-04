@@ -52,13 +52,6 @@ int main(int argc, char *argv[]) {
         headers.push_back({argv[i],scanFile(&in)});
     }
 
-
-
-
-
-
-
-
     for (auto header : headers) {
         std::cout << header.first << std::endl;
         for (auto body : header.second) {
