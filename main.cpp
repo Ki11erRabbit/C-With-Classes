@@ -32,6 +32,7 @@ vector<string> scanFile(ifstream *in) {
             while (getline(ss,token, ' ')) {
                 if (token == "")
                     continue;
+
                 accumulator.push_back(token);
             }
         }
