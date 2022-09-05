@@ -28,7 +28,13 @@ public:
 
         out << returnType << " (*" << methodName << ")(";
         for (size_t i = 0; i < parameters.size(); i++) {
-            out << parameters.at(i).getType();
+            string param = parameters.at(i).getType();
+            if (param.find(className) < param.size()) {
+                out << "struct " << param;
+            }
+            else {
+                out << param;
+            }
             if (i < parameters.size()-1)
                 out << ", ";
         }

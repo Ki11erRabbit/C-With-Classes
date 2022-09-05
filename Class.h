@@ -27,17 +27,41 @@ private:
         stringstream out;
         out << "typedef struct " << className << " {" << endl;
         for (auto member : members) {
-            out << "\t" << member << ";" << endl;
+            if (member.getName() == className) {
+                out << "\t" << "struct " << member << ";" << endl;
+            }
+            else {
+                out << "\t" << member << ";" << endl;
+            }
+        }
+        for (auto method : methods) {
+            out << method.pointerForm() << endl;
         }
         out << "} " << className << ";" << endl;
     }
 public:
 
     string makeSource() {
+        stringstream out;
+        out << "#include \"" << className << ".h\"" << endl << endl;
 
+        out << constructor.functionForm() << endl << endl;
+        out << constructorPointer.functionForm() << endl << endl;
+        out << deconstructor.functionForm() << endl << endl;
+
+        for (auto method : methods) {
+            out << method.functionForm() << endl << endl;
+        }
     }
 
     string makeHeader() {
+        stringstream out;
+
+        out << makeStruct() << endl << endl;
+
+        out << constructor.definitionForm() << endl << endl;
+        out << constructorPointer.definitionForm() << endl << endl;
+        out << deconstructor.definitionForm() << endl << endl;
 
     }
 };
