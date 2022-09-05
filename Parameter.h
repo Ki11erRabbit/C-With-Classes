@@ -15,6 +15,7 @@ private:
     std::string type;
     std::string name;
     std::string pointer;
+    std::string storedValue;
 
 public:
 
@@ -22,6 +23,8 @@ public:
     : type(type), name(name) {};
     Parameter (std::string type, std::string pointer, std::string name)
             : type(type), pointer(pointer), name(name) {};
+    Parameter (std::string type, std::string pointer, std::string name, std::string storedValue)
+            : type(type), pointer(pointer), name(name), storedValue(storedValue) {};
 
     std::string getType() {
         return type;

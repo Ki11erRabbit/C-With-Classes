@@ -226,7 +226,7 @@ private:
                 case ';':
                     return {1,{TERMINATOR, NONE}};
                 case ',':
-                    return {1, {OPERATOR,NONE}};
+                    return {1, {OPERATOR,COMMA}};
                 case '#':
                     return {1, {SPECIALCHAR,NONE}};
                 case '\\':
@@ -279,6 +279,8 @@ private:
             }
         }
     }
+
+
 public:
 
     Scanner(const std::string& input) : input (input) { }
@@ -301,6 +303,7 @@ public:
         return Token(pair.second.first,pair.second.second,value);
 
     }
+
 
 };
 

@@ -68,11 +68,13 @@ private:
     void classForm() {
         string name;
         vector<string> param;
+        vector<vector<Parameter>> members;
         if (tokenType() == KEYWORD) {
             match(KEYWORD);
             name = match(IDENTIFIER);
             if (tokenType() == BRACE) {
                 match(BRACE);
+                members = formMembers();
                 param = parameterBlock();
 
                 methodList();
@@ -87,6 +89,98 @@ private:
         else {
             throwError();
         }
+    }
+
+    vector<vector<Parameter>> formMembers() {//can't have volatile,register, or static members
+        vector<vector<Parameter>> members;
+        varList();
+
+        return members;
+    }
+    vector<Parameter> varList() {
+        vector<Parameter> variables;
+        string type;
+        string name;
+        string value;
+        string pointer;
+        string temp;
+        if (tokenType() == KEYWORD) {
+            while (tokenType() != TERMINATOR) {
+                if (tokenType() == KEYWORD) {//sets variable type
+                    temp = match(KEYWORD);
+                    if (temp == "volatile" || temp == "register" || temp == "extern" || temp == "const") {
+                        type += temp + " ";
+                    }
+                    else if (temp == "unsigned" || temp == "signed") {
+                        type += temp + " ";
+                    }
+                    else {
+                        type += match(KEYWORD);//should be something like char, int, long, etc
+                    }
+                }
+                else if (tokenType() == OPERATOR) {// ONLY for pointers
+                    if (nextTokenType() == IDENTIFIER && subTokenType() != COMMA) {// for pointers
+                        temp = match(OPERATOR);
+                        pointer = "*";
+                        name = match(IDENTIFIER);
+                        if (tokenType() == OPERATOR && subTokenType() == ASSIGNMENT) {
+                            match(OPERATOR); //matches assignment operator
+                            temp = "";
+                            while (tokenType() != TERMINATOR || tokenType() != OPERATOR) {
+                                temp += match();
+                            }
+                        }
+                    }
+                    else {//for commas
+                        variables.push_back(Parameter(type,name,pointer,value));
+                        match(OPERATOR);
+                    }
+                }
+                else if (tokenType() == IDENTIFIER) {
+                    name = match(IDENTIFIER);
+
+                    if (tokenType() == OPERATOR) {
+                        if (subTokenType() == COMMA) {
+                            match(OPERATOR);
+                        }
+                    }
+                }
+
+
+            }
+            match(TERMINATOR);
+            variables.push_back(Parameter(type,name,pointer,value));
+        }
+    }
+
+    vector<Parameter> parameterList() {
+        vector<Parameter> params;
+        if (tokenType() == SPECIALCHAR) {
+            match(SPECIALCHAR);
+            params.push_back(parameterForm());
+        }
+        if (tokenType() == OPERATOR) {
+            match(OPERATOR);
+            return parameterList(params);
+        }
+        else {
+            return params;
+        }
+
+    }
+    vector<Parameter> parameterList(vector<Parameter> params) {
+        if (tokenType() == OPERATOR) {
+            match(OPERATOR);
+            params.push_back(parameterForm());
+        }
+        if (tokenType() == OPERATOR) {
+            match(OPERATOR);
+            return parameterList(params);
+        }
+        else {
+            return params;
+        }
+
     }
     Parameter parameterForm() {
         string argType, argName;
@@ -271,35 +365,7 @@ private:
 
     }
 
-    vector<Parameter> parameterList() {
-        vector<Parameter> params;
-        if (tokenType() == SPECIALCHAR) {
-            match(SPECIALCHAR);
-            params.push_back(parameterForm());
-        }
-        if (tokenType() == OPERATOR) {
-            match(OPERATOR);
-            return parameterList(params);
-        }
-        else {
-            return params;
-        }
 
-    }
-    vector<Parameter> parameterList(vector<Parameter> params) {
-        if (tokenType() == OPERATOR) {
-            match(OPERATOR);
-            params.push_back(parameterForm());
-        }
-        if (tokenType() == OPERATOR) {
-            match(OPERATOR);
-            return parameterList(params);
-        }
-        else {
-            return params;
-        }
-
-    }
 
 public:
 
