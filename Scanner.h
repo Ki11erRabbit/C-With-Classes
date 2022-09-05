@@ -170,35 +170,35 @@ private:
             }
             //Every other KEYWORD
             else if (input.find("register") == 0) {
-                return {8,{KEYWORD,CODE}};
+                return {8,{KEYWORD,TYPE}};
             }
             else if (input.find("return") == 0) {
-                return {6, {KEYWORD,CODE}};
+                return {6, {KEYWORD,RETURN}};
             }
             else if (input.find("extern") == 0) {
-                return {6, {KEYWORD,CODE}};
+                return {6, {KEYWORD,TYPE}};
             }
             else if (input.find("static") == 0) {
-                return {6,{KEYWORD,CODE}};
+                return {6,{KEYWORD,TYPE}};
             }
             else if (input.find("sizeof") == 0) {
-                return {6, {KEYWORD,CODE}};
+                return {6, {KEYWORD,SIZEOF}};
             }
             else if (input.find("union") == 0) {
                 return {5, {KEYWORD,TYPE}};
             }
             else if (input.find("volatile") == 0) {
-                return {8, {KEYWORD,CODE}};
+                return {8, {KEYWORD,TYPE}};
             }
             //My KEYWORDS
             else if (input.find("this") == 0) {
-                return {4, {KEYWORD,CODE}};
+                return {4, {KEYWORD,TYPE}};
             }
             else if (input.find("class") == 0) {//TODO: add next token as custom type
                 return {5, {KEYWORD,TYPE}};
             }
             else if (input.find("new") == 0) {
-                return {3, {KEYWORD,CODE}};
+                return {3, {KEYWORD,TYPE}};
             }
             else {
                 return {findEnding(),{IDENTIFIER,NONE}};
@@ -244,7 +244,7 @@ private:
                 case '+':
                     if (input.at(1) == '=')
                         return {2, {OPERATOR,NONE}};
-                    return {1, {OPERATOR,NONE}};
+                    return {1, {OPERATOR,ASSIGNMENT}};
                 case '-':
                     if (input.at(1) == '=' || input.at(1) == '>')
                         return {2, {OPERATOR,NONE}};

@@ -12,8 +12,8 @@ enum TokenType {
     IDENTIFIER, KEYWORD, CONSTANT, OPERATOR, SPECIALCHAR, STRING, UNDEFINED, COMMENT, BRACE, TERMINATOR,
 };
 
-enum SubTokenType {//for keywords
-    NONE,TYPE, CONTROL, CODE
+enum SubTokenType {//for keywords and operators
+    NONE=0,TYPE=1, CONTROL=2, CODE=3, ASSIGNMENT, SIZEOF, RETURN
 };
 
 class Token {
@@ -59,6 +59,12 @@ private:
                 return "CONTROL";
             case CODE:
                 return "CODE";
+            case ASSIGNMENT:
+                return "ASSIGNMENT";
+            case SIZEOF:
+                return "SIZEOF";
+            case RETURN:
+                return "RETURN";
             default:
                 return "UNDEFINED";
         }
@@ -76,8 +82,8 @@ public:
     std::string getValue() const {
         return value;
     }
-    TokenType getSubType () const {
-        return type;
+    SubTokenType getSubType () const {
+        return subType;
     }
     void setSubType(SubTokenType type) {
         subType = type;

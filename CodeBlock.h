@@ -8,12 +8,17 @@
 #include <string>
 #include <iostream>
 #include <sstream>
+#include <vector>
 
 class CodeBlock {
 private:
-    std::string lines;
+    std::string line;
+    std::vector<std::string> lines;
 
 public:
+    CodeBlock(std::vector<std::string> lines)
+    : lines(lines) {}
+
     std::string toString() const{
         std::stringstream out;
 

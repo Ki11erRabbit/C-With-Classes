@@ -4,6 +4,7 @@
 #include <sstream>
 
 #include "Scanner.h"
+#include "Parser.h"
 #define headerFile pair<string,vector<string>>
 
 using namespace std;
@@ -95,6 +96,10 @@ int main(int argc, char *argv[]) {
     for (auto token : tokens) {
         cout << token << endl;
     }
+
+    Parser parser(tokens);
+
+    parser.startParsing();
 
 
 

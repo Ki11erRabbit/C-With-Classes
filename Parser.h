@@ -29,6 +29,15 @@ private:
     TokenType nextNextTokenType() const {
         return tokens.at(2).getType();
     }
+    SubTokenType subTokenType() const {
+        return tokens.at(0).getSubType();
+    }
+    SubTokenType nextSubTokenType() const {
+        return tokens.at(1).getSubType();
+    }
+    SubTokenType nextNextSubTokenType() const {
+        return tokens.at(2).getSubType();
+    }
 
     string advanceToken() {
         string value = tokens.at(0).getValue();
@@ -37,6 +46,7 @@ private:
     }
 
     void throwError() {
+        cout << endl << tokens.at(0) << endl;
         throw(tokens.at(0));
     }
 
@@ -60,7 +70,7 @@ private:
             if (tokenType() == BRACE) {
                 parameterBlock();
 
-                methodBlock();
+                methodList();
 
                 if (tokenType() == SPECIALCHAR) {
                     if (tokenType() == SPECIALCHAR) {
@@ -96,29 +106,154 @@ private:
 
     }
 
-    vector<string> codeBlockForm() {
+    CodeBlock codeBlockForm() {
         match(BRACE); //opening brace
         vector<string> lines;
-        lines.push_back(expressionForm());
-
+        while (tokenType() != BRACE) {
+            lines.push_back(expressionForm());
+        }
         match(BRACE);//closeing brace
-        return lines;
+        return CodeBlock(lines);
     }
     string expressionForm() {
+        string expression;
         if(tokenType() == KEYWORD) {
-            if (nextTokenType() == IDENTIFIER) {//variable declaration
+            switch (subTokenType()) {
+                case TYPE://TYPE declarations
+                expression += match(KEYWORD);
+                while (subTokenType() == TYPE) {// for things like unsigned long
+                    expression += " " + match(KEYWORD);
+                }
+                if (tokenType() == OPERATOR) {//pointer
+                    expression += " " + match(OPERATOR);
+                }
+                while (tokenType() != TERMINATOR) {// for multiple declarations
+                    if (tokenType() == IDENTIFIER) {
+                        if (nextTokenType() == SPECIALCHAR) {
+                            expression += functionCallForm();
+                        }
+                        else {
+                            expression += " " + match(IDENTIFIER);
+                        }
+                    }
+                    if (subTokenType() == ASSIGNMENT) {// for variable assignment
+                        expression +=  " " + match(OPERATOR);
+                        expression + " " +match();
+                    }
+                    if (tokenType() == OPERATOR) {// comma variable declaration
+                        expression += match(OPERATOR) + " ";
+                    }
+                }
+                expression += match(TERMINATOR);
+                cout << expression << endl;
+                    return expression;
+                case CONTROL://loops and conditionals
+                    expression += match(KEYWORD);
+                    if (expression == "if") {
 
-            }
-            if (nextTokenType() == SPECIALCHAR && (nextNextTokenType() == IDENTIFIER || nextNextTokenType() == CONSTANT) {// loops
+                        expression += conditionalForm();
 
+                        CodeBlock block = codeBlockForm();
+                        expression += block.toString() + "\n";
+                    }
+                    else if (expression == "else") {
+                        CodeBlock block = codeBlockForm();
+                        expression += block.toString() +"\n";
+                    }
+                    else if (expression == "for") {
+                        expression += match(SPECIALCHAR);//opening paren
+                        while (tokenType() != SPECIALCHAR) {
+                            while (tokenType() != TERMINATOR) {
+                                expression +=match();//matches everything
+                            }
+                            expression += match(TERMINATOR);
+                        }
+                        expression += match(SPECIALCHAR);//closing paren
+                        CodeBlock block = codeBlockForm();
+                        expression += block.toString() +"\n";
+                    }
+                    else if (expression == "while") {
+                        expression += match(SPECIALCHAR);
+
+                        expression += conditionalForm();
+
+                        CodeBlock block = codeBlockForm();
+                        expression += block.toString() + "\n";
+                    }
+                    else if (expression == "do") {
+                        CodeBlock block = codeBlockForm();
+                        expression += block.toString();
+                        expression += match(KEYWORD);
+
+                        expression += conditionalForm();
+
+                        expression += match(TERMINATOR) + "\n";
+                    }
+                    else if (expression == "goto") {
+                        expression += " " +match(IDENTIFIER);
+                        expression +=match(TERMINATOR);
+                    }
+                    cout << expression << endl;
+                    return expression;
+                case SIZEOF://special declarations should never get run
+                expression += functionCallForm();
+                expression += match(TERMINATOR);
+                    cout << expression << endl;
+                    return expression;
+                case RETURN://return
+                    expression += match(KEYWORD) + " ";
+                    while (tokenType() != TERMINATOR) {
+                        expression += " " +match();
+                    }
+                    expression += match(TERMINATOR);
+                    cout << expression << endl;
+                    return expression;
             }
+        }//end of keywords
+        else if (tokenType() == IDENTIFIER) {
+            expression += match(IDENTIFIER);
+            while (tokenType() != TERMINATOR) {
+                expression += " " + match();//matches everything until semicolon
+            }
+            expression += match(TERMINATOR);
+            cout << expression << endl;
+            return expression;
         }
+
+    }
+    string conditionalForm() {// for (some logical expressions here)
+        string expression;
+        expression += match(SPECIALCHAR);
+        while (tokenType() != SPECIALCHAR) {//closing paren
+            expression += match(); //matches everything TODO: make sure this works
+        }
+        expression += match(SPECIALCHAR); //closing paren
+
+        cout << expression << endl;
+        return expression;
+    }
+    string functionCallForm() {
+        string call;
+        if (subTokenType() == SIZEOF) {
+            call += match(KEYWORD);
+        }
+        else {
+            call += match(IDENTIFIER);
+        }
+        call += match(SPECIALCHAR);
+        while (tokenType() != SPECIALCHAR) {
+            call += match();//hacky way to match everything
+        }
+        call += match(SPECIALCHAR);
+
+        cout << call << endl;
+        return call;
     }
 
     void parameterBlock() {
 
     }
-    void methodBlock() {
+    void methodList() {
 
     }
 
@@ -151,11 +286,16 @@ private:
         }
 
     }
-    void methodList() {
-
-    }
 
 public:
+
+    Parser (vector<Token> tokens)
+    : tokens(tokens) {}
+
+    void startParsing() {
+
+        classForm();
+    }
 
 };
 
