@@ -44,6 +44,18 @@ private:
                 return i+1;
         }
     }
+    int findNumEnding() {
+        for (size_t i = 1; i < input.size(); i++) {
+            if (!std::isdigit(input.at(i))) {
+                if (i == 1 && input.at(i) == 'x')
+                    continue;
+                if (input.at(i) == '\n')
+                    return i;
+                return i;
+
+            }
+        }
+    }
     size_t findEnding() {
         for (size_t i = 1; i < input.size(); i++) {
             switch (input.at(i)) {
@@ -193,7 +205,7 @@ private:
             }
         }
         else if (isdigit(input.at(0))) {
-            return {findEnding(), CONSTANT};
+            return {findNumEnding(), CONSTANT};
         }
         else {
             switch (input.at(0)) {
@@ -257,6 +269,8 @@ private:
                     return {1, OPERATOR};
                 case '\'':
                     return {findCharEnding(), CONSTANT};
+                case '~':
+                    return {findEnding(), IDENTIFIER};
                 default:
                     return {findEnding(), UNDEFINED};
             }

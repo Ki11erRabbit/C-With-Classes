@@ -89,7 +89,7 @@ int main(int argc, char *argv[]) {
     while (scanner.getSize() != 0) {
         currToken = scanner.scanToken();
         tokens.push_back(currToken);
-        cout << currToken << endl;
+        //cout << currToken << endl;
     }
 
     for (auto token : tokens) {
