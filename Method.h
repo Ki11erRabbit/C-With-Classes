@@ -16,9 +16,7 @@
 using namespace std;
 class Method {
 private:
-    string returnType;
-    string methodName;
-    string className;
+    string returnType, methodName, className;
     vector<Parameter> parameters;
     CodeBlock body;
 

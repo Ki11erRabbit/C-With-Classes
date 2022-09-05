@@ -29,6 +29,9 @@ private:
     TokenType nextNextTokenType() const {
         return tokens.at(2).getType();
     }
+    TokenType tokenTypeAt(size_t i) const {
+        return tokens.at(i).getType();
+    }
     SubTokenType subTokenType() const {
         return tokens.at(0).getSubType();
     }
@@ -46,7 +49,7 @@ private:
     }
 
     void throwError() {
-        cout << endl << tokens.at(0) << endl;
+        cout << endl << endl << "\t" << tokens.at(0) << endl;
         throw(tokens.at(0));
     }
 
@@ -64,11 +67,13 @@ private:
 
     void classForm() {
         string name;
+        vector<string> param;
         if (tokenType() == KEYWORD) {
             match(KEYWORD);
             name = match(IDENTIFIER);
             if (tokenType() == BRACE) {
-                parameterBlock();
+                match(BRACE);
+                param = parameterBlock();
 
                 methodList();
 
@@ -79,9 +84,9 @@ private:
                 }
             }
         }
-        throwError();
-
-
+        else {
+            throwError();
+        }
     }
     Parameter parameterForm() {
         string argType, argName;
@@ -120,33 +125,7 @@ private:
         if(tokenType() == KEYWORD) {
             switch (subTokenType()) {
                 case TYPE://TYPE declarations
-                expression += match(KEYWORD);
-                while (subTokenType() == TYPE) {// for things like unsigned long
-                    expression += " " + match(KEYWORD);
-                }
-                if (tokenType() == OPERATOR) {//pointer
-                    expression += " " + match(OPERATOR);
-                }
-                while (tokenType() != TERMINATOR) {// for multiple declarations
-                    if (tokenType() == IDENTIFIER) {
-                        if (nextTokenType() == SPECIALCHAR) {
-                            expression += functionCallForm();
-                        }
-                        else {
-                            expression += " " + match(IDENTIFIER);
-                        }
-                    }
-                    if (subTokenType() == ASSIGNMENT) {// for variable assignment
-                        expression +=  " " + match(OPERATOR);
-                        expression + " " +match();
-                    }
-                    if (tokenType() == OPERATOR) {// comma variable declaration
-                        expression += match(OPERATOR) + " ";
-                    }
-                }
-                expression += match(TERMINATOR);
-                cout << expression << endl;
-                    return expression;
+                expression = variableDeclaration();
                 case CONTROL://loops and conditionals
                     expression += match(KEYWORD);
                     if (expression == "if") {
@@ -249,9 +228,44 @@ private:
         cout << call << endl;
         return call;
     }
+    string variableDeclaration() {
+        string expression;
+        expression += match(KEYWORD);
+        while (subTokenType() == TYPE) {// for things like unsigned long
+            expression += " " + match(KEYWORD);
+        }
+        if (tokenType() == OPERATOR) {//pointer
+            expression += " " + match(OPERATOR);
+        }
+        while (tokenType() != TERMINATOR) {// for multiple declarations
+            if (tokenType() == IDENTIFIER) {
+                if (nextTokenType() == SPECIALCHAR) {
+                    expression += functionCallForm();
+                }
+                else {
+                    expression += " " + match(IDENTIFIER);
+                }
+            }
+            if (subTokenType() == ASSIGNMENT) {// for variable assignment
+                expression +=  " " + match(OPERATOR);
+                expression + " " +match();
+            }
+            if (tokenType() == OPERATOR) {// comma variable declaration
+                expression += match(OPERATOR) + " ";
+            }
+        }
+        expression += match(TERMINATOR);
+        cout << expression << endl;
+        return expression;
+    }
 
-    void parameterBlock() {
 
+    vector<string> parameterBlock() {
+        vector<string> params;
+        string expression;
+        if (tokenType() == KEYWORD) {
+            expression = variableDeclaration();
+        }
     }
     void methodList() {
 

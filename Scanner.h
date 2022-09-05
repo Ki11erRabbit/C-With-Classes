@@ -137,6 +137,9 @@ private:
             else if (input.find("struct") == 0) {
                 return {6,{KEYWORD,TYPE}};
             }
+            else if (input.find("size_t") == 0) {//important enough to be a type
+                return {6,{KEYWORD,TYPE}};
+            }
             //Control Flow
             else if (input.find("if") == 0) {
                 return {2, {KEYWORD,CONTROL}};
