@@ -15,7 +15,7 @@ using namespace std;
 class ClassStructure {
 private:
     string className;
-    vector<pair<string,string>> classData;
+    vector<string> classData;
     vector<MethodStructure> methods;
     MethodStructure constructor;
     MethodStructure deconstructor;

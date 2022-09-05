@@ -11,7 +11,7 @@ bool isCType(string line) {
 
     if (line.find("char") < line.size() || line.find("int") < line.size() || line.find("long") < line.size() ||
     line.find("short") < line.size() || line.find("float") < line.size() || line.find("double") < line.size() ||
-    line.find("void") < line.size()) {
+    line.find("void") < line.size() || line.find("struct") < line.size()) {
         return true;
     }
     return false;
