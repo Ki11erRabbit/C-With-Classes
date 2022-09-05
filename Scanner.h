@@ -94,185 +94,185 @@ private:
         }
         return 0;
     }
-    std::pair<int,TokenType> setType() {
+    std::pair<int,std::pair<TokenType,SubTokenType>> setType() {
         if (std::isalpha(input.at(0))) {
             //KEYWORDS
             //Types
             if (input.find("char") == 0) {
-                return {4, KEYWORD};
+                return {4, {KEYWORD, TYPE}};
             }
             else if (input.find("short") == 0) {
-                return {5,KEYWORD};
+                return {5, {KEYWORD,TYPE}};
             }
             else if (input.find("int") == 0) {
-                return {3, KEYWORD};
+                return {3, {KEYWORD,TYPE}};
             }
             else if (input.find("long") == 0) {
-                return {4,KEYWORD};
+                return {4,{KEYWORD,TYPE}};
             }
             else if (input.find("float") == 0) {
-                return {5, KEYWORD};
+                return {5, {KEYWORD,TYPE}};
             }
             else if (input.find("double") == 0) {
-                return {6,KEYWORD};
+                return {6,{KEYWORD,TYPE}};
             }
             else if (input.find("unsigned") == 0) {
-                return {8, KEYWORD};
+                return {8, {KEYWORD,TYPE}};
             }
             else if (input.find("signed") == 0) {
-                return {6,KEYWORD};
+                return {6,{KEYWORD,TYPE}};
             }
             else if (input.find("void") == 0) {
-                return {4, KEYWORD};
+                return {4, {KEYWORD,TYPE}};
             }
             else if (input.find("enum") == 0) {
-                return {4,KEYWORD};
+                return {4,{KEYWORD,TYPE}};
             }
-            else if (input.find("typedef") == 0) {
-                return {7,KEYWORD};
+            else if (input.find("typedef") == 0) {//TODO: add in ability to create custom types
+                return {7,{KEYWORD,TYPE}};
             }
             else if (input.find("auto") == 0) {
-                return {4,KEYWORD};
+                return {4,{KEYWORD,TYPE}};
             }
             else if (input.find("struct") == 0) {
-                return {6,KEYWORD};
+                return {6,{KEYWORD,TYPE}};
             }
             //Control Flow
             else if (input.find("if") == 0) {
-                return {2, KEYWORD};
+                return {2, {KEYWORD,CONTROL}};
             }
             else if (input.find("else") == 0) {
-                return {4, KEYWORD};
+                return {4, {KEYWORD,CONTROL}};
             }
             else if (input.find("while") == 0) {
-                return {5,KEYWORD};
+                return {5,{KEYWORD,CONTROL}};
             }
             else if (input.find("for") == 0) {
-                return {3, KEYWORD};
+                return {3, {KEYWORD,CONTROL}};
             }
             else if (input.find("do") == 0) {
-                return {2,KEYWORD};
+                return {2,{KEYWORD,CONTROL}};
             }
             else if (input.find("case") == 0) {
-                return {4, KEYWORD};
+                return {4, {KEYWORD,CONTROL}};
             }
             else if (input.find("break") == 0) {
-                return {5, KEYWORD};
+                return {5, {KEYWORD,CONTROL}};
             }
             else if (input.find("continue") == 0) {
-                return {8,KEYWORD};
+                return {8,{KEYWORD,CONTROL}};
             }
             else if (input.find("default") == 0) {
-                return {7, KEYWORD};
+                return {7, {KEYWORD,CONTROL}};
             }
             else if (input.find("goto") == 0) {
-                return {4, KEYWORD};
+                return {4, {KEYWORD,CONTROL}};
             }
             //Every other KEYWORD
             else if (input.find("register") == 0) {
-                return {8,KEYWORD};
+                return {8,{KEYWORD,CODE}};
             }
             else if (input.find("return") == 0) {
-                return {6, KEYWORD};
+                return {6, {KEYWORD,CODE}};
             }
             else if (input.find("extern") == 0) {
-                return {6, KEYWORD};
+                return {6, {KEYWORD,CODE}};
             }
             else if (input.find("static") == 0) {
-                return {6,KEYWORD};
+                return {6,{KEYWORD,CODE}};
             }
             else if (input.find("sizeof") == 0) {
-                return {6, KEYWORD};
+                return {6, {KEYWORD,CODE}};
             }
             else if (input.find("union") == 0) {
-                return {5, KEYWORD};
+                return {5, {KEYWORD,TYPE}};
             }
             else if (input.find("volatile") == 0) {
-                return {8, KEYWORD};
+                return {8, {KEYWORD,CODE}};
             }
             //My KEYWORDS
             else if (input.find("this") == 0) {
-                return {4, KEYWORD};
+                return {4, {KEYWORD,CODE}};
             }
-            else if (input.find("class") == 0) {
-                return {5, KEYWORD};
+            else if (input.find("class") == 0) {//TODO: add next token as custom type
+                return {5, {KEYWORD,TYPE}};
             }
             else if (input.find("new") == 0) {
-                return {3, KEYWORD};
+                return {3, {KEYWORD,CODE}};
             }
             else {
-                return {findEnding(),IDENTIFIER};
+                return {findEnding(),{IDENTIFIER,NONE}};
             }
         }
         else if (isdigit(input.at(0))) {
-            return {findNumEnding(), CONSTANT};
+            return {findNumEnding(), {CONSTANT,NONE}};
         }
         else {
             switch (input.at(0)) {
                 case '\"':
-                    return {findStringEnding(),STRING};
+                    return {findStringEnding(),{STRING,NONE}};
                 case '[':
                 case ']':
-                    return {1,SPECIALCHAR};
+                    return {1,{SPECIALCHAR,NONE}};
                 case '(':
                 case ')':
-                    return {1,SPECIALCHAR};
+                    return {1,{SPECIALCHAR,NONE}};
                 case '{':
                 case '}':
-                    return {1, SPECIALCHAR};
+                    return {1, {BRACE, NONE}};
                 case ';':
-                    return {1,SPECIALCHAR};
+                    return {1,{TERMINATOR, NONE}};
                 case ',':
-                    return {1, OPERATOR};
+                    return {1, {OPERATOR,NONE}};
                 case '#':
-                    return {1, SPECIALCHAR};
+                    return {1, {SPECIALCHAR,NONE}};
                 case '\\':
-                    return {1, SPECIALCHAR};
+                    return {1, {SPECIALCHAR,NONE}};
                 case ':':
                 case '?':
                 case '.':
-                    return {1, OPERATOR};
+                    return {1, {OPERATOR,NONE}};
                 case '/':
                     if (input.at(1) == '/')
-                        return {findLineCommentEnding(), COMMENT };
+                        return {findLineCommentEnding(), {COMMENT,NONE} };
                     if (input.at(1) == '*'){
-                        return {findMultiLineCommentEnding(), COMMENT};
+                        return {findMultiLineCommentEnding(), {COMMENT,NONE}};
                     }
                 case '*':
                 case '=':
                 case '%':
                 case '+':
                     if (input.at(1) == '=')
-                        return {2, OPERATOR};
-                    return {1, OPERATOR};
+                        return {2, {OPERATOR,NONE}};
+                    return {1, {OPERATOR,NONE}};
                 case '-':
                     if (input.at(1) == '=' || input.at(1) == '>')
-                        return {2, OPERATOR};
-                    return {1, OPERATOR};
+                        return {2, {OPERATOR,NONE}};
+                    return {1, {OPERATOR,NONE}};
                     //logical and bitwise Operators
                 case '&':
                     if (input.at(1) == '&') {
-                        return {2,OPERATOR};
+                        return {2,{OPERATOR,NONE}};
                     }
-                    return {1,OPERATOR};
+                    return {1,{OPERATOR,NONE}};
                 case '|':
                     if (input.at(1) == '|') {
-                        return {2,OPERATOR};
+                        return {2,{OPERATOR,NONE}};
                     }
-                    return {1,OPERATOR};
+                    return {1,{OPERATOR,NONE}};
                 case '^':
                 case '>':
                 case '<':
                 case '!':
                     if (input.at(1) == '=')
-                        return {2, OPERATOR};
-                    return {1, OPERATOR};
+                        return {2, {OPERATOR,NONE}};
+                    return {1, {OPERATOR,NONE}};
                 case '\'':
-                    return {findCharEnding(), CONSTANT};
+                    return {findCharEnding(), {CONSTANT,NONE}};
                 case '~':
-                    return {findEnding(), IDENTIFIER};
+                    return {findEnding(), {IDENTIFIER,NONE}};
                 default:
-                    return {findEnding(), UNDEFINED};
+                    return {findEnding(), {UNDEFINED,NONE}};
             }
         }
     }
@@ -289,13 +289,13 @@ public:
             input = input.substr(1);
         }
 
-        std::pair<int,TokenType> pair = setType();
+        std::pair<int,std::pair<TokenType,SubTokenType>> pair = setType();
         std::string value;
 
         value = input.substr(0, pair.first);
         input = input.substr(pair.first);
 
-        return Token(pair.second,value);
+        return Token(pair.second.first,pair.second.second,value);
 
     }
 

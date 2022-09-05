@@ -14,8 +14,14 @@ class Parameter {
 private:
     std::string type;
     std::string name;
+    std::string pointer;
 
 public:
+
+    Parameter (std::string type, std::string name)
+    : type(type), name(name) {};
+    Parameter (std::string type, std::string pointer, std::string name)
+            : type(type), pointer(pointer), name(name) {};
 
     std::string getType() {
         return type;
@@ -31,7 +37,7 @@ public:
         out.str();
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const Parameter& pram)
+    friend std::ostream& operator<<(std::ostream& os, const Parameter& param)
     {
         os << param.toString();
         return os;
