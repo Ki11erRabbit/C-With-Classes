@@ -3,6 +3,7 @@
 #include <vector>
 #include <sstream>
 
+#include "Scanner.h"
 #define headerFile pair<string,vector<string>>
 
 using namespace std;
@@ -71,21 +72,29 @@ int main(int argc, char *argv[]) {
 
     std::cout << argc << " " << argv[1] << std::endl;
 
-    vector<headerFile> headers;
 
-    for (int i = 1; i < argc; i++) {
-        ifstream in(argv[1]);
-        headers.push_back({argv[i],scanFile(&in)});
+    ifstream in(argv[1]);
+    string accumulator;
+    char currentChar;
+    while (in.peek() != EOF) {
+        in.get(currentChar);
+        accumulator += currentChar;
     }
 
-    for (auto header : headers) {
-        std::cout << header.first << std::endl;
-        for (auto body : header.second) {
-            cout << "\t" << body << endl;
-        }
+    Scanner scanner(accumulator);
+    vector<Token> tokens;
+    Token currToken = scanner.scanToken();
+    tokens.push_back(currToken);
+
+    while (scanner.getSize() != 0) {
+        currToken = scanner.scanToken();
+        tokens.push_back(currToken);
+        cout << currToken << endl;
     }
 
-
+    for (auto token : tokens) {
+        cout << token << endl;
+    }
 
 
 
