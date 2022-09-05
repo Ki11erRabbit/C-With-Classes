@@ -3,4 +3,4 @@ project(CWithClasses)
 
 set(CMAKE_CXX_STANDARD 11)
 
-add_executable(CWithClasses main.cpp ClassStructure.h MethodStructure.h MethodParameter.h Parser.h Token.h Scanner.h Method.h CodeBlock.h Parameter.h)
+add_executable(CWithClasses main.cpp ClassStructure.h MethodStructure.h MethodParameter.h Parser.h Token.h Scanner.h Method.h CodeBlock.h Parameter.h Class.h)

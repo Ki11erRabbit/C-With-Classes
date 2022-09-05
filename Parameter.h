@@ -24,6 +24,18 @@ public:
         return name;
     }
 
+    std::string toString() const{
+        std::stringstream out;
+        out << type << " " << name;
+
+        out.str();
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const Parameter& pram)
+    {
+        os << param.toString();
+        return os;
+    }
 };
 
 
