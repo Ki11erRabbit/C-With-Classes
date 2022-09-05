@@ -32,6 +32,18 @@ private:
                 return i+1;
         }
     }
+    int findLineCommentEnding(){
+        for (size_t i = 1; i < input.size(); i++) {
+            if (input.at(i) == '\n')
+                return i;
+        }
+    }
+    int findMultiLineCommentEnding(){
+        for (size_t i = 1; i < input.size(); i++) {
+            if (input.at(i) == '*' && input.at(i+1) == '/')
+                return i+1;
+        }
+    }
     size_t findEnding() {
         for (size_t i = 1; i < input.size(); i++) {
             switch (input.at(i)) {
@@ -206,10 +218,16 @@ private:
                     return {1, SPECIALCHAR};
                 case ':':
                 case '?':
+                case '.':
                     return {1, OPERATOR};
-                case '=':
-                case '*':
                 case '/':
+                    if (input.at(1) == '/')
+                        return {findLineCommentEnding(), COMMENT };
+                    if (input.at(1) == '*'){
+                        return {findMultiLineCommentEnding(), COMMENT};
+                    }
+                case '*':
+                case '=':
                 case '%':
                 case '+':
                     if (input.at(1) == '=')
@@ -258,12 +276,13 @@ public:
         }
 
         std::pair<int,TokenType> pair = setType();
+        std::string value;
 
-        std::string value = input.substr(0, pair.first);
-
+        value = input.substr(0, pair.first);
         input = input.substr(pair.first);
 
         return Token(pair.second,value);
+
     }
 
 };

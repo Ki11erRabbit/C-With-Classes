@@ -9,7 +9,7 @@
 #include <sstream>
 
 enum TokenType {
-    IDENTIFIER, KEYWORD, CONSTANT, OPERATOR, SPECIALCHAR, STRING, UNDEFINED
+    IDENTIFIER, KEYWORD, CONSTANT, OPERATOR, SPECIALCHAR, STRING, UNDEFINED, COMMENT
 };
 
 class Token {
@@ -31,6 +31,8 @@ private:
                 return "SPECIALCHAR";
             case STRING:
                 return "STRING";
+            case COMMENT:
+                return "COMMENT";
             case UNDEFINED:
             default:
                 return "UNDEFINED";
