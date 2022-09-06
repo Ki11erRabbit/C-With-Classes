@@ -15,9 +15,9 @@ typedef struct temp {
     int y;
 } Temp;
 typedef long int hello;
-typedef struct other newStruct;
+typedef struct jes newStruct;
 
-struct other {
+struct jes {
     int x,z;
     int y;
 };

@@ -201,7 +201,9 @@ private:
                 return {5, {KEYWORD,TYPE}};
             }
             else if (input.find("new") == 0) {
-                return {findEnding(), {KEYWORD,TYPE}};
+                if (!std::isspace(input.at(4)))
+                    return {findEnding(),{IDENTIFIER,NONE}};
+                return {3, {KEYWORD,TYPE}};
             }
             else {
                 return {findEnding(),{IDENTIFIER,NONE}};

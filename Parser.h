@@ -394,12 +394,13 @@ private:
     string typeDef() {
         string expression;
         string newType;
-        if (tokenType() == KEYWORD && peek() != "class") {
+        if (tokenType() == KEYWORD && peek() == "typedef") {
             expression += match(KEYWORD);
             if (peek() == "struct") {
                 if (nextTokenType() == IDENTIFIER && nextNextTokenType() == IDENTIFIER) {
-                    expression += match(KEYWORD) + " " + match(IDENTIFIER);
-                    newType = match(IDENTIFIER);
+                    expression += " " + match(KEYWORD) + " ";
+                    expression += match(IDENTIFIER) + " ";
+                    newType = match(IDENTIFIER) + " ";
                     expression += newType + match(TERMINATOR);
                 }
                 else {
@@ -425,7 +426,7 @@ private:
     }
     vector<string> typedefList() {
         vector<string> list;
-        if (tokenType() == KEYWORD && peek() != "class") {
+        if (tokenType() == KEYWORD && peek() == "typedef") {
             list.push_back(typeDef());
             return typedefList(list);
         }
@@ -434,7 +435,7 @@ private:
         }
     }
     vector<string> typedefList(vector<string> list) {
-        if (tokenType() == KEYWORD && peek() != "class") {
+        if (tokenType() == KEYWORD && peek() == "typedef") {
             list.push_back(typeDef());
             return typedefList(list);
         }
