@@ -356,12 +356,12 @@ private:
 
 
 
-    void updateType(string identifier) {//FIXME: doesn't change the type
+    void updateType(string identifier) {
         for (size_t i = 0; i < tokens.size(); i++) {
-            if (tokens.at(i).getType() == IDENTIFIER) {
-                if (tokens.at(i).getValue() == identifier) {
-                    tokens.at(i).setType(KEYWORD);
-                    tokens.at(i).setSubType(TYPE);
+            if (this->tokens.at(i).getType() == IDENTIFIER) {
+                if (this->tokens.at(i).getValue() == identifier) {
+                    this->tokens.at(i).setType(KEYWORD);
+                    this->tokens.at(i).setSubType(TYPE);
                 }
             }
         }
@@ -422,7 +422,7 @@ private:
     }
     vector<string> typedefList() {
         vector<string> list;
-        if (tokenType() == KEYWORD && peek() == "class") {
+        if (tokenType() == KEYWORD && peek() != "class") {
             list.push_back(typeDef());
             return typedefList(list);
         }
@@ -431,7 +431,7 @@ private:
         }
     }
     vector<string> typedefList(vector<string> list) {
-        if (tokenType() == KEYWORD && peek() == "class") {
+        if (tokenType() == KEYWORD && peek() != "class") {
             list.push_back(typeDef());
             return typedefList(list);
         }
