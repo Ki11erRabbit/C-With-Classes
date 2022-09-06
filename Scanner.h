@@ -249,6 +249,8 @@ private:
                 case '-':
                     if (input.at(1) == '=')
                         return {2, {OPERATOR,ASSIGNMENT}};
+                    else if (input.at(1) == '>')
+                        return {2,{OPERATOR,ASSIGNMENT}};
                     return {1, {OPERATOR,NONE}};
                     //logical and bitwise Operators
                 case '&':

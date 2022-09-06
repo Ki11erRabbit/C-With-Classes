@@ -89,7 +89,7 @@ public:
     SubTokenType getSubType () const {
         return subType;
     }
-    void setSubType(SubTokenType type) {
+    void setSubType(SubTokenType type){
         subType = type;
     }
     void setType(TokenType type) {

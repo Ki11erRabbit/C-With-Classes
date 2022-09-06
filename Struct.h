@@ -19,7 +19,14 @@ private:
     vector<Parameter> body;
 public:
     Struct(string name, vector<Parameter> body)
-    : name(name), body(body) {}
+    : name(name), body(body) {};
+
+    Struct(string name)
+            : name(name) {};
+
+    void addBody(Parameter param) {
+        body.push_back(param);
+    }
 
 
     string toString() const{
