@@ -9,7 +9,15 @@
             printf(" %s number", str);\
             printf("\n");\
            }
-
+struct phil {
+    int x,z;
+    int y;
+};
+#define MAC(a,lim) while (a < lim) { \
+            {\
+            printf("Aqsa ");\
+            a++;\
+            }
 typedef struct temp {
     int x,z;
     int y;
@@ -18,6 +26,11 @@ typedef long int hello;
 typedef struct jes newStruct;
 
 struct jes {
+    int x,z;
+    int y;
+};
+
+struct bob {
     int x,z;
     int y;
 };

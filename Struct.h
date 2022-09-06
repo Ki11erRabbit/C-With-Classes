@@ -39,6 +39,12 @@ public:
         out << "}";
         return out.str();
     }
+
+    friend std::ostream& operator<<(std::ostream& os, const Struct& strct)
+    {
+        os << strct.toString();
+        return os;
+    }
 };
 
 

@@ -92,6 +92,18 @@ private:
             return tokenString;
         }
     }
+    vector<string> matchUntil(TokenType type1, SubTokenType type2) {
+        vector<string> tokenString;
+        while (!(tokenType() == type1 || subTokenType() == type2)) {
+            tokenString.push_back(advanceToken());
+        }
+        if (tokens.size() == 0) {
+            throwError();
+        }
+        else {
+            return tokenString;
+        }
+    }
 
     string include() {
         if (peek() == "#include") {
@@ -178,7 +190,7 @@ private:
 
         expression += " ";
 
-        vector<string> tokenString = matchUntil(KEYWORD,PREPROC);
+        vector<string> tokenString = matchUntil(PREPROC,TYPE);
 
         for (size_t i = 0; i < tokenString.size(); i++) {
             if (tokenString.at(i) == "\\") {
@@ -222,7 +234,7 @@ private:
     }
     vector<string> macroList() {
         vector<string> list;
-        if (tokenType() == PREPROC) {
+        if (tokenType() == PREPROC && peek() == "#define") {
             list.push_back(macro());
             return macroList(list);
         }
@@ -231,7 +243,7 @@ private:
         }
     }
     vector<string> macroList(vector<string> list) {
-        if (tokenType() == PREPROC) {
+        if (tokenType() == PREPROC && peek() == "#define") {
             list.push_back(macro());
             return macroList(list);
         }
@@ -444,7 +456,27 @@ private:
         }
     }
 
-
+    vector<Struct> structList() {
+        vector<Struct> list;
+        if (tokenType() == KEYWORD && peek() == "struct") {
+            list.push_back(structM());
+            match(TERMINATOR);
+            return structList(list);
+        }
+        else {
+            return list;
+        }
+    }
+    vector<Struct> structList(vector<Struct> list) {
+        if (tokenType() == KEYWORD && peek() == "struct") {
+            list.push_back(structM());
+            match(TERMINATOR);
+            return structList(list);
+        }
+        else {
+            return list;
+        }
+    }
 
 
 public:
@@ -453,9 +485,45 @@ public:
     : tokens(tokens) {}
 
     void startParsing() {
-        vector<string> includes = includeList();
-        vector<string> macros = macroList();
-        vector<string> typeDefs = typedefList();
+        vector<string> includes;
+        vector<string> macros;
+        vector<string> typeDefs;
+        vector<Struct> structs;
+        int i = 0;
+        while (i < 8) {
+            if (tokenType() == PREPROC) {
+                if (peek() == "#include") {
+                    vector<string> tempIncludes = includeList();
+                    for (auto include : tempIncludes) {
+                        includes.push_back(include);
+                    }
+                }
+                else {
+                    vector<string> tempMacros = macroList();
+                    for (auto macro : tempMacros) {
+                        macros.push_back(macro);
+                    }
+                }
+            }
+            if (tokenType() == KEYWORD) {
+                if (peek() == "typedef") {
+                    vector<string> tempTypeDefs = typedefList();
+                    for (auto typDef : tempTypeDefs) {
+                        typeDefs.push_back(typDef);
+                    }
+                }
+                if (peek() == "struct") {
+                    vector<Struct> tempStructs = structList();
+                    for (auto strucT : tempStructs) {
+                        structs.push_back(strucT);
+                    }
+                }
+            }
+            i++;
+        }
+
+
+
 
         for (auto include : includes) {
             cout << include << endl;
@@ -465,6 +533,9 @@ public:
         }
         for (auto typeDef : typeDefs) {
             cout << typeDef << endl;
+        }
+        for (auto strucT : structs) {
+            cout << strucT << endl;
         }
 
         for (size_t i = 0; i < tokens.size(); i++) {
