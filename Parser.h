@@ -11,6 +11,7 @@
 
 #include "Token.h"
 #include "Class.h"
+#include "Struct.h"
 
 #define headerFile pair<string,vector<string>>
 using namespace std;
@@ -163,14 +164,6 @@ private:
         }
     }
 
-    string expression() {
-
-    }
-
-    string statement() {
-
-    }
-
     string functionMacro(string name) {
         string expression = name;
         expression += match(SPECIALCHAR);//(
@@ -178,7 +171,7 @@ private:
         for (size_t i = 0; i < list.size(); i++) {
             expression += list.at(i);
             if (i < list.size()-1) {
-                expression += ", ";
+                expression += ",";
             }
         }
         expression += match(SPECIALCHAR);//)
@@ -195,35 +188,6 @@ private:
                 expression += tokenString.at(i);
             }
         }
-        expression += "\n";
-
-        /*if (tokenType() == BRACE) { // {
-            expression += " " + match(BRACE);
-            vector<string> tokenString = matchUntil(BRACE);
-            for (size_t i = 0; i < tokenString.size(); i++) {
-                if (tokenString.at(i) == "\\") {
-                    expression += tokenString.at(i) + "\n";
-                }
-                else {
-                    expression += tokenString.at(i);
-                }
-            }
-            expression += match(BRACE) + "\n";
-        }
-        else if (tokenType() == PREPROC) { //
-            vector<string> tokenString = matchUntil(KEYWORD);
-        }
-        else if (tokenType() == OPERATOR) {// ++x
-            expression += " " + match(OPERATOR);
-            expression += match(IDENTIFIER);
-        }
-        else if (tokenType() == SPECIALCHAR) {//(x + y) or \ i.e expression
-
-        }
-        else {//everything else while, statements, ; ; ;
-
-        }*/
-
         return expression;
     }
 
@@ -276,6 +240,189 @@ private:
         }
     }
 
+    string functionCall() {
+
+    }
+
+    string type() {//mashes type tokens together
+        string type;
+        if (tokenType() == KEYWORD) {
+            while (tokenType() == KEYWORD && subTokenType() == TYPE) {
+                type += match(KEYWORD) + " ";
+            }
+            return type;
+        }
+        else {
+            throwError();
+        }
+    }
+
+    vector<Parameter> variableDeclaration() {
+        string varType,varName, pointer, contents;
+        vector<Parameter> varList;
+        if (tokenType() == KEYWORD) {
+            varType = type();
+            if (tokenType() == OPERATOR) {//for pointers
+                pointer = match(OPERATOR);
+            }
+            varName = match(IDENTIFIER);
+            if (tokenType() == OPERATOR) {
+                if (subTokenType() == ASSIGNMENT) {
+                    match(OPERATOR);
+                    if (tokenType() == IDENTIFIER) {//function
+                        contents = functionCall();
+                    }
+                    else if (tokenType() == CONSTANT) {
+                        contents = match(CONSTANT);
+                    }
+                    else if (tokenType() == STRING) {
+                        contents = match(STRING);
+                    }
+                }
+                varList.push_back(Parameter(varType,pointer,varName,contents));
+                return variableDeclaration(varList, varType);
+            }
+            if (tokenType() == TERMINATOR) {
+                return varList;
+            }
+            else {
+                throwError();
+            }
+        }
+        else {
+            throwError();
+        }
+    }
+    vector<Parameter> variableDeclaration(vector<Parameter> varList, string varType) {
+        string varName, pointer, contents;
+        if (tokenType() == KEYWORD) {
+            varType = type();
+            if (tokenType() == OPERATOR) {//for pointers
+                pointer = match(OPERATOR);
+            }
+            varName = match(IDENTIFIER);
+            if (tokenType() == OPERATOR) {
+                if (subTokenType() == ASSIGNMENT) {
+                    match(OPERATOR);
+                    if (tokenType() == IDENTIFIER) {//function
+                        contents = functionCall();
+                    }
+                    else if (tokenType() == CONSTANT) {
+                        contents = match(CONSTANT);
+                    }
+                    else if (tokenType() == STRING) {
+                        contents = match(STRING);
+                    }
+                }
+                varList.push_back(Parameter(varType,pointer,varName,contents));
+                return variableDeclaration(varList, varType);
+            }
+            if (tokenType() == TERMINATOR) {
+                return varList;
+            }
+            else {
+                throwError();
+            }
+        }
+        else {
+            throwError();
+        }
+    }
+
+    vector<vector<Parameter>> variableDeclarationList() {
+        vector<vector<Parameter>> list;
+        if (tokenType() == KEYWORD) {
+            list.push_back(variableDeclaration());
+            return variableDeclarationList(list);
+        }
+        else {
+            return list;
+        }
+    }
+    vector<vector<Parameter>> variableDeclarationList(vector<vector<Parameter>> list) {
+        if (tokenType() == KEYWORD) {
+            list.push_back(variableDeclaration());
+            return variableDeclarationList(list);
+        }
+        else {
+            return list;
+        }
+    }
+
+
+
+    void updateType(string identifier) {
+        for (auto token : tokens) {
+            if (token.getType() == IDENTIFIER) {
+                if (token.getValue() == identifier) {
+                    token.setType(KEYWORD);
+                    token.setSubType(TYPE);
+                }
+            }
+        }
+    }
+    Struct structM() {
+        if (tokenType() == KEYWORD) {
+            match(KEYWORD);
+            string name = match(IDENTIFIER);
+            match(BRACE);
+            vector<vector<Parameter>> tempBody = variableDeclarationList();
+            vector<Parameter> body;
+            for (auto list : tempBody) {
+                for (auto var : list) {
+                    body.push_back(var);
+                }
+            }
+            return Struct(name,body);
+        }
+        else {
+            throwError();
+        }
+    }
+
+    string typeDef() {
+        string expression;
+        if (tokenType() == KEYWORD) {
+            expression += match(KEYWORD);
+            if (peek() == "struct") {
+                if (nextTokenType() == IDENTIFIER && nextNextTokenType() == IDENTIFIER) {
+                    expression += match(KEYWORD) + " " + match(IDENTIFIER);
+                    expression += match(IDENTIFIER) + match(TERMINATOR);
+                }
+                else {
+                    Struct temp =structM();
+                }
+            }
+            string temp = type();
+            if (temp == "struct") {
+                string structName;
+                expression += " " + temp;
+                structName = match(IDENTIFIER);
+                expression += " " + structName;
+                if (tokenType() == IDENTIFIER) {
+                    temp = match(IDENTIFIER);
+                    updateType(temp);
+                    expression += " " + temp;
+                    expression += match(TERMINATOR);
+                }
+                else if (tokenType() == BRACE) {
+
+                }
+            }
+            else {
+                expression += " " + match(IDENTIFIER);
+                expression += match(TERMINATOR);
+            }
+            return expression;
+        }
+        else {
+            throwError();
+        }
+    }
+    vector<string> typedefList() {
+
+    }
+
 
 
 
@@ -287,12 +434,17 @@ public:
     void startParsing() {
         vector<string> includes = includeList();
         vector<string> macros = macroList();
+        vector<string> typeDef = typedefList();
 
         for (auto include : includes) {
             cout << include << endl;
         }
         for (auto define : macros) {
             cout << define << endl;
+        }
+
+        for (auto token : tokens) {
+            cout << token << endl;
         }
 
     }

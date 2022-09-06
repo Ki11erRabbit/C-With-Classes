@@ -11,7 +11,7 @@
            }
 
 typedef struct temp {
-    int x;
+    int x,z;
     int y;
 } Temp;
 
