@@ -93,15 +93,15 @@ int main(int argc, char *argv[]) {
         //cout << currToken << endl;
     }
 
-    tokens = scanner.setTypedefAsKeyword(tokens);
+
 
     for (auto token : tokens) {
         cout << token << endl;
     }
 
-    /*Parser parser(tokens);
+    Parser parser(tokens);
 
-    parser.startParsing();*/
+    parser.startParsing();
 
 
 

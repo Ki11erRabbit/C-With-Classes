@@ -1,5 +1,8 @@
 #include <stdio.h>
+#include "test.h"
 #define letsGOOOO 8
+#define SUM(x,y) (x+y)
+#define SWITCH(x,y) x^y; x^y
 #define MACRO(num, str) {\
             printf("%d", num);\
             printf(" is");\

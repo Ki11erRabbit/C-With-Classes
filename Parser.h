@@ -41,6 +41,9 @@ private:
     SubTokenType nextNextSubTokenType() const {
         return tokens.at(2).getSubType();
     }
+    string peek() const {
+        return tokens.at(0).getValue();
+    }
 
     string advanceToken() {
         string value = tokens.at(0).getValue();
@@ -61,309 +64,218 @@ private:
             throwError();
         }
     }
-    string match() {
+    string matchAll() {
         return advanceToken();
     }
+    vector<string> matchUntil(TokenType type) {
+        vector<string> tokenString;
+        while (tokenType() != type) {
+            tokenString.push_back(advanceToken());
+        }
+        if (tokens.size() == 0) {
+            throwError();
+        }
+        else {
+            return tokenString;
+        }
+    }
+    vector<string> matchUntil(TokenType type1, TokenType type2) {
+        vector<string> tokenString;
+        while (!(tokenType() == type1 || tokenType() == type2)) {
+            tokenString.push_back(advanceToken());
+        }
+        if (tokens.size() == 0) {
+            throwError();
+        }
+        else {
+            return tokenString;
+        }
+    }
 
-    void classForm() {
-        string name;
-        vector<string> param;
-        vector<vector<Parameter>> members;
-        if (tokenType() == KEYWORD) {
-            match(KEYWORD);
-            name = match(IDENTIFIER);
-            if (tokenType() == BRACE) {
-                match(BRACE);
-                members = formMembers();
-                param = parameterBlock();
-
-                methodList();
-
-                if (tokenType() == SPECIALCHAR) {
-                    if (tokenType() == SPECIALCHAR) {
-                        return;
-                    }
-                }
+    string include() {
+        if (peek() == "#include") {
+            string expression;
+            expression += match(PREPROC);//#include
+            expression += " ";
+            if (tokenType() == OPERATOR) {
+                expression += match(OPERATOR);//<
+                expression += match(IDENTIFIER);
+                expression += match(OPERATOR);
             }
+            else if (tokenType() == STRING){
+                expression += match(STRING);
+
+            }
+            return expression;
+        }
+        else {
+            throwError();
+        }
+    }
+    vector<string> includeList() {
+        vector<string> list;
+        if (peek() == "#include") {
+            list.push_back(include());
+            return includeList(list);
+        }
+        else {
+            return list;
+        }
+    }
+    vector<string> includeList(vector<string> list) {
+        if (peek() == "#include") {
+            list.push_back(include());
+            return includeList(list);
+        }
+        else {
+            return list;
+        }
+    }
+
+    string identifier() {
+        if (tokenType() == IDENTIFIER) {
+            return match(IDENTIFIER);
         }
         else {
             throwError();
         }
     }
 
-    vector<vector<Parameter>> formMembers() {//can't have volatile,register, or static members
-        vector<vector<Parameter>> members;
-        varList();
-
-        return members;
-    }
-    vector<Parameter> varList() {
-        vector<Parameter> variables;
-        string type;
-        string name;
-        string value;
-        string pointer;
-        string temp;
-        if (tokenType() == KEYWORD) {
-            while (tokenType() != TERMINATOR) {
-                if (tokenType() == KEYWORD) {//sets variable type
-                    temp = match(KEYWORD);
-                    if (temp == "volatile" || temp == "register" || temp == "extern" || temp == "const") {
-                        type += temp + " ";
-                    }
-                    else if (temp == "unsigned" || temp == "signed") {
-                        type += temp + " ";
-                    }
-                    else {
-                        type += match(KEYWORD);//should be something like char, int, long, etc
-                    }
-                }
-                else if (tokenType() == OPERATOR) {// ONLY for pointers
-                    if (nextTokenType() == IDENTIFIER && subTokenType() != COMMA) {// for pointers
-                        temp = match(OPERATOR);
-                        pointer = "*";
-                        name = match(IDENTIFIER);
-                        if (tokenType() == OPERATOR && subTokenType() == ASSIGNMENT) {
-                            match(OPERATOR); //matches assignment operator
-                            temp = "";
-                            while (tokenType() != TERMINATOR || tokenType() != OPERATOR) {
-                                temp += match();
-                            }
-                        }
-                    }
-                    else {//for commas
-                        variables.push_back(Parameter(type,name,pointer,value));
-                        match(OPERATOR);
-                    }
-                }
-                else if (tokenType() == IDENTIFIER) {
-                    name = match(IDENTIFIER);
-
-                    if (tokenType() == OPERATOR) {
-                        if (subTokenType() == COMMA) {
-                            match(OPERATOR);
-                        }
-                    }
-                }
-
-
-            }
-            match(TERMINATOR);
-            variables.push_back(Parameter(type,name,pointer,value));
-        }
-    }
-
-    vector<Parameter> parameterList() {
-        vector<Parameter> params;
-        if (tokenType() == SPECIALCHAR) {
-            match(SPECIALCHAR);
-            params.push_back(parameterForm());
-        }
+    vector<string> identifierList() {
+        vector<string> list;
+        list.push_back(identifier());
         if (tokenType() == OPERATOR) {
             match(OPERATOR);
-            return parameterList(params);
+            return identifierList(list);
         }
         else {
-            return params;
+            return list;
         }
-
     }
-    vector<Parameter> parameterList(vector<Parameter> params) {
+    vector<string> identifierList(vector<string> list) {
+        list.push_back(identifier());
         if (tokenType() == OPERATOR) {
             match(OPERATOR);
-            params.push_back(parameterForm());
-        }
-        if (tokenType() == OPERATOR) {
-            match(OPERATOR);
-            return parameterList(params);
+            return identifierList(list);
         }
         else {
-            return params;
+            return list;
         }
-
     }
-    Parameter parameterForm() {
-        string argType, argName;
-        string argPointer = "";
 
-        argType = match(KEYWORD);
-        if (tokenType() == OPERATOR) {//for pointers
-            argPointer = match(OPERATOR);
-        }
-        argName = match(IDENTIFIER);
-        return Parameter(argType, argPointer,argName);
-    }
-    void methodForm() {
-        string returnType, name;
-
-        returnType = match(KEYWORD);
-        name = match(IDENTIFIER);
-        vector<Parameter> param = parameterList();
-        match(SPECIALCHAR);// closing paren
-
-        codeBlockForm();
+    string expression() {
 
     }
 
-    CodeBlock codeBlockForm() {
-        match(BRACE); //opening brace
-        vector<string> lines;
-        while (tokenType() != BRACE) {
-            lines.push_back(expressionForm());
-        }
-        match(BRACE);//closeing brace
-        return CodeBlock(lines);
+    string statement() {
+
     }
-    string expressionForm() {
-        string expression;
-        if(tokenType() == KEYWORD) {
-            switch (subTokenType()) {
-                case TYPE://TYPE declarations
-                expression = variableDeclaration();
-                case CONTROL://loops and conditionals
-                    expression += match(KEYWORD);
-                    if (expression == "if") {
 
-                        expression += conditionalForm();
-
-                        CodeBlock block = codeBlockForm();
-                        expression += block.toString() + "\n";
-                    }
-                    else if (expression == "else") {
-                        CodeBlock block = codeBlockForm();
-                        expression += block.toString() +"\n";
-                    }
-                    else if (expression == "for") {
-                        expression += match(SPECIALCHAR);//opening paren
-                        while (tokenType() != SPECIALCHAR) {
-                            while (tokenType() != TERMINATOR) {
-                                expression +=match();//matches everything
-                            }
-                            expression += match(TERMINATOR);
-                        }
-                        expression += match(SPECIALCHAR);//closing paren
-                        CodeBlock block = codeBlockForm();
-                        expression += block.toString() +"\n";
-                    }
-                    else if (expression == "while") {
-                        expression += match(SPECIALCHAR);
-
-                        expression += conditionalForm();
-
-                        CodeBlock block = codeBlockForm();
-                        expression += block.toString() + "\n";
-                    }
-                    else if (expression == "do") {
-                        CodeBlock block = codeBlockForm();
-                        expression += block.toString();
-                        expression += match(KEYWORD);
-
-                        expression += conditionalForm();
-
-                        expression += match(TERMINATOR) + "\n";
-                    }
-                    else if (expression == "goto") {
-                        expression += " " +match(IDENTIFIER);
-                        expression +=match(TERMINATOR);
-                    }
-                    cout << expression << endl;
-                    return expression;
-                case SIZEOF://special declarations should never get run
-                expression += functionCallForm();
-                expression += match(TERMINATOR);
-                    cout << expression << endl;
-                    return expression;
-                case RETURN://return
-                    expression += match(KEYWORD) + " ";
-                    while (tokenType() != TERMINATOR) {
-                        expression += " " +match();
-                    }
-                    expression += match(TERMINATOR);
-                    cout << expression << endl;
-                    return expression;
+    string functionMacro(string name) {
+        string expression = name;
+        expression += match(SPECIALCHAR);//(
+        vector<string> list = identifierList();
+        for (size_t i = 0; i < list.size(); i++) {
+            expression += list.at(i);
+            if (i < list.size()-1) {
+                expression += ", ";
             }
-        }//end of keywords
-        else if (tokenType() == IDENTIFIER) {
-            expression += match(IDENTIFIER);
-            while (tokenType() != TERMINATOR) {
-                expression += " " + match();//matches everything until semicolon
+        }
+        expression += match(SPECIALCHAR);//)
+
+        expression += " ";
+
+        vector<string> tokenString = matchUntil(KEYWORD,PREPROC);
+
+        for (size_t i = 0; i < tokenString.size(); i++) {
+            if (tokenString.at(i) == "\\") {
+                expression += tokenString.at(i) + "\n";
             }
-            expression += match(TERMINATOR);
-            cout << expression << endl;
-            return expression;
+            else {
+                expression += tokenString.at(i);
+            }
         }
+        expression += "\n";
 
-    }
-    string conditionalForm() {// for (some logical expressions here)
-        string expression;
-        expression += match(SPECIALCHAR);
-        while (tokenType() != SPECIALCHAR) {//closing paren
-            expression += match(); //matches everything TODO: make sure this works
-        }
-        expression += match(SPECIALCHAR); //closing paren
-
-        cout << expression << endl;
-        return expression;
-    }
-    string functionCallForm() {
-        string call;
-        if (subTokenType() == SIZEOF) {
-            call += match(KEYWORD);
-        }
-        else {
-            call += match(IDENTIFIER);
-        }
-        call += match(SPECIALCHAR);
-        while (tokenType() != SPECIALCHAR) {
-            call += match();//hacky way to match everything
-        }
-        call += match(SPECIALCHAR);
-
-        cout << call << endl;
-        return call;
-    }
-    string variableDeclaration() {
-        string expression;
-        expression += match(KEYWORD);
-        while (subTokenType() == TYPE) {// for things like unsigned long
-            expression += " " + match(KEYWORD);
-        }
-        if (tokenType() == OPERATOR) {//pointer
-            expression += " " + match(OPERATOR);
-        }
-        while (tokenType() != TERMINATOR) {// for multiple declarations
-            if (tokenType() == IDENTIFIER) {
-                if (nextTokenType() == SPECIALCHAR) {
-                    expression += functionCallForm();
+        /*if (tokenType() == BRACE) { // {
+            expression += " " + match(BRACE);
+            vector<string> tokenString = matchUntil(BRACE);
+            for (size_t i = 0; i < tokenString.size(); i++) {
+                if (tokenString.at(i) == "\\") {
+                    expression += tokenString.at(i) + "\n";
                 }
                 else {
-                    expression += " " + match(IDENTIFIER);
+                    expression += tokenString.at(i);
                 }
             }
-            if (subTokenType() == ASSIGNMENT) {// for variable assignment
-                expression +=  " " + match(OPERATOR);
-                expression + " " +match();
-            }
-            if (tokenType() == OPERATOR) {// comma variable declaration
-                expression += match(OPERATOR) + " ";
-            }
+            expression += match(BRACE) + "\n";
         }
-        expression += match(TERMINATOR);
-        cout << expression << endl;
+        else if (tokenType() == PREPROC) { //
+            vector<string> tokenString = matchUntil(KEYWORD);
+        }
+        else if (tokenType() == OPERATOR) {// ++x
+            expression += " " + match(OPERATOR);
+            expression += match(IDENTIFIER);
+        }
+        else if (tokenType() == SPECIALCHAR) {//(x + y) or \ i.e expression
+
+        }
+        else {//everything else while, statements, ; ; ;
+
+        }*/
+
         return expression;
     }
 
-
-    vector<string> parameterBlock() {
-        vector<string> params;
+    string macro() {
         string expression;
-        if (tokenType() == KEYWORD) {
-            expression = variableDeclaration();
+        if (peek() == "#define") {
+            expression += match(PREPROC);//#define
+            expression += " ";
+            if (tokenType() == IDENTIFIER) {
+                string temp;
+                temp = match(IDENTIFIER);
+                if (tokenType() == CONSTANT) {
+                    expression += temp + " " + match(CONSTANT);
+                }
+                else if (tokenType() == STRING) {
+                    expression += temp + " " + match(STRING);
+                }
+                else if (tokenType() == OPERATOR) {//for like #define AND &&
+                    expression += temp + " " + match(OPERATOR);
+                }
+                else if (tokenType() == SPECIALCHAR) { //for macros like MACRO(x,y) (x + y)
+                    expression += functionMacro(temp);
+                }
+                return expression;
+            }
+            else
+                throwError();
+        }
+        else {
+            throwError();
         }
     }
-    void methodList() {
-
+    vector<string> macroList() {
+        vector<string> list;
+        if (tokenType() == PREPROC) {
+            list.push_back(macro());
+            return macroList(list);
+        }
+        else {
+            return list;
+        }
     }
+    vector<string> macroList(vector<string> list) {
+        if (tokenType() == PREPROC) {
+            list.push_back(macro());
+            return macroList(list);
+        }
+        else {
+            return list;
+        }
+    }
+
 
 
 
@@ -373,8 +285,16 @@ public:
     : tokens(tokens) {}
 
     void startParsing() {
+        vector<string> includes = includeList();
+        vector<string> macros = macroList();
 
-        classForm();
+        for (auto include : includes) {
+            cout << include << endl;
+        }
+        for (auto define : macros) {
+            cout << define << endl;
+        }
+
     }
 
 };

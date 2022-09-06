@@ -228,7 +228,7 @@ private:
                 case ',':
                     return {1, {OPERATOR,COMMA}};
                 case '#':
-                    return {1, {SPECIALCHAR,NONE}};
+                    return {findEnding(), {PREPROC,NONE}};
                 case '\\':
                     return {1, {SPECIALCHAR,NONE}};
                 case ':':
@@ -243,29 +243,34 @@ private:
                     }
                 case '*':
                 case '=':
+                case '^':
                 case '%':
                 case '+':
-                    if (input.at(1) == '=')
-                        return {2, {OPERATOR,NONE}};
-                    return {1, {OPERATOR,ASSIGNMENT}};
                 case '-':
-                    if (input.at(1) == '=' || input.at(1) == '>')
-                        return {2, {OPERATOR,NONE}};
+                    if (input.at(1) == '=')
+                        return {2, {OPERATOR,ASSIGNMENT}};
                     return {1, {OPERATOR,NONE}};
                     //logical and bitwise Operators
                 case '&':
-                    if (input.at(1) == '&') {
-                        return {2,{OPERATOR,NONE}};
-                    }
-                    return {1,{OPERATOR,NONE}};
                 case '|':
-                    if (input.at(1) == '|') {
+                    if (input.at(1) == '&')
+                        return {2,{OPERATOR,NONE}};
+                    else if (input.at(1) == '=')
+                        return {2,{OPERATOR,ASSIGNMENT}};
+                    return {1,{OPERATOR,NONE}};
+                case '>':
+                    if (input.at(1) == '>') {
+                        if (input.at(2) == '=')
+                            return {3,{OPERATOR,ASSIGNMENT}};
+                        return {2,{OPERATOR,NONE}};
+                    }
+                case '<':
+                    if (input.at(1) == '>') {
+                        if (input.at(2) == '=')
+                            return {3,{OPERATOR,ASSIGNMENT}};
                         return {2,{OPERATOR,NONE}};
                     }
                     return {1,{OPERATOR,NONE}};
-                case '^':
-                case '>':
-                case '<':
                 case '!':
                     if (input.at(1) == '=')
                         return {2, {OPERATOR,NONE}};

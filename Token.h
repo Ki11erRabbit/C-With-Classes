@@ -9,7 +9,7 @@
 #include <sstream>
 
 enum TokenType {
-    IDENTIFIER, KEYWORD, CONSTANT, OPERATOR, SPECIALCHAR, STRING, UNDEFINED, COMMENT, BRACE, TERMINATOR,
+    IDENTIFIER, KEYWORD, CONSTANT, OPERATOR, SPECIALCHAR, STRING, UNDEFINED, COMMENT, BRACE, TERMINATOR, PREPROC
 };
 
 enum SubTokenType {//for keywords and operators
@@ -42,6 +42,8 @@ private:
                 return "BRACE";
             case TERMINATOR:
                 return "TERMINATOR";
+            case PREPROC:
+                return "PREPROC";
             case UNDEFINED:
             default:
                 return "UNDEFINED";
