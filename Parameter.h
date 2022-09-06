@@ -37,7 +37,7 @@ public:
         std::stringstream out;
         out << type << " " << name;
 
-        out.str();
+        return out.str();
     }
 
     friend std::ostream& operator<<(std::ostream& os, const Parameter& param)

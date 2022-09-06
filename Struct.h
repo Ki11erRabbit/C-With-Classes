@@ -31,10 +31,10 @@ public:
 
     string toString() const{
         stringstream out;
-        out << "struct " << name << " {";
+        out << "struct " << name << " {" << endl;
 
         for (auto var : body) {
-            //out << var << ";" << endl;
+            out << var << ";" << endl;
         }
         out << "}";
         return out.str();

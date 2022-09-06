@@ -201,7 +201,7 @@ private:
                 return {5, {KEYWORD,TYPE}};
             }
             else if (input.find("new") == 0) {
-                return {3, {KEYWORD,TYPE}};
+                return {findEnding(), {KEYWORD,TYPE}};
             }
             else {
                 return {findEnding(),{IDENTIFIER,NONE}};

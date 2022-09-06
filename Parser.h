@@ -247,6 +247,11 @@ private:
     string type() {//mashes type tokens together
         string type;
         if (tokenType() == KEYWORD) {
+            if (peek() == "struct") {
+                type += match(KEYWORD);
+                type += " " + match(IDENTIFIER);
+                return type;
+            }
             while (tokenType() == KEYWORD && subTokenType() == TYPE) {
                 type += match(KEYWORD) + " ";
             }
@@ -366,7 +371,7 @@ private:
             }
         }
     }
-    Struct structM() {//FIXME: doesn't allocate struct properly
+    Struct structM() {
         if (tokenType() == KEYWORD) {
             match(KEYWORD);
             string name = match(IDENTIFIER);
@@ -379,9 +384,7 @@ private:
                 }
             }
             match(BRACE);
-            Struct temp = Struct(name,body);
-            cout << temp.toString() << endl;
-            return temp;
+            return Struct(name,body);;
         }
         else {
             throwError();
@@ -401,14 +404,14 @@ private:
                 }
                 else {
                     Struct temp = structM();
-                    expression += temp.toString();
+                    expression += " " + temp.toString();
                     newType = match(IDENTIFIER);
                     expression += " " + newType;
                     expression += match(TERMINATOR);
                 }
             }
             else {
-                expression += type();
+                expression += " " + type();
                 newType = match(IDENTIFIER);
                 expression += " " + newType;
                 expression += match(TERMINATOR);
@@ -451,13 +454,16 @@ public:
     void startParsing() {
         vector<string> includes = includeList();
         vector<string> macros = macroList();
-        vector<string> typeDef = typedefList();
+        vector<string> typeDefs = typedefList();
 
         for (auto include : includes) {
             cout << include << endl;
         }
         for (auto define : macros) {
             cout << define << endl;
+        }
+        for (auto typeDef : typeDefs) {
+            cout << typeDef << endl;
         }
 
         for (size_t i = 0; i < tokens.size(); i++) {

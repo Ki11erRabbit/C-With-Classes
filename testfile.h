@@ -14,10 +14,17 @@ typedef struct temp {
     int x,z;
     int y;
 } Temp;
+typedef long int hello;
+typedef struct other newStruct;
 
+struct other {
+    int x,z;
+    int y;
+};
 class test {
     int data;
     Temp hold;
+    hello world;
 
     //returns data
     int getData() {
