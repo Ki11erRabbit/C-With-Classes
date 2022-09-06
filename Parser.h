@@ -279,10 +279,15 @@ private:
                         contents = match(STRING);
                     }
                 }
+                else {
+                    match(OPERATOR);
+                }
                 varList.push_back(Parameter(varType,pointer,varName,contents));
                 return variableDeclaration(varList, varType);
             }
+            varList.push_back(Parameter(varType,pointer,varName,contents));
             if (tokenType() == TERMINATOR) {
+                match(TERMINATOR);
                 return varList;
             }
             else {
@@ -295,34 +300,34 @@ private:
     }
     vector<Parameter> variableDeclaration(vector<Parameter> varList, string varType) {
         string varName, pointer, contents;
-        if (tokenType() == KEYWORD) {
-            varType = type();
-            if (tokenType() == OPERATOR) {//for pointers
-                pointer = match(OPERATOR);
-            }
-            varName = match(IDENTIFIER);
-            if (tokenType() == OPERATOR) {
-                if (subTokenType() == ASSIGNMENT) {
-                    match(OPERATOR);
-                    if (tokenType() == IDENTIFIER) {//function
-                        contents = functionCall();
-                    }
-                    else if (tokenType() == CONSTANT) {
-                        contents = match(CONSTANT);
-                    }
-                    else if (tokenType() == STRING) {
-                        contents = match(STRING);
-                    }
+
+        if (tokenType() == OPERATOR) {//for pointers
+            pointer = match(OPERATOR);
+        }
+        varName = match(IDENTIFIER);
+        if (tokenType() == OPERATOR) {
+            if (subTokenType() == ASSIGNMENT) {
+                match(OPERATOR);
+                if (tokenType() == IDENTIFIER) {//function
+                    contents = functionCall();
                 }
-                varList.push_back(Parameter(varType,pointer,varName,contents));
-                return variableDeclaration(varList, varType);
-            }
-            if (tokenType() == TERMINATOR) {
-                return varList;
+                else if (tokenType() == CONSTANT) {
+                    contents = match(CONSTANT);
+                }
+                else if (tokenType() == STRING) {
+                    contents = match(STRING);
+                }
             }
             else {
-                throwError();
+                match(OPERATOR);
             }
+            varList.push_back(Parameter(varType,pointer,varName,contents));
+            return variableDeclaration(varList, varType);
+        }
+        varList.push_back(Parameter(varType,pointer,varName,contents));
+        if (tokenType() == TERMINATOR) {
+            match(TERMINATOR);
+            return varList;
         }
         else {
             throwError();
@@ -351,7 +356,7 @@ private:
 
 
 
-    void updateType(string identifier) {
+    void updateType(string identifier) {//FIXME: doesn't change the type
         for (auto token : tokens) {
             if (token.getType() == IDENTIFIER) {
                 if (token.getValue() == identifier) {
@@ -361,7 +366,7 @@ private:
             }
         }
     }
-    Struct structM() {
+    Struct structM() {//FIXME: doesn't allocate struct properly
         if (tokenType() == KEYWORD) {
             match(KEYWORD);
             string name = match(IDENTIFIER);
@@ -373,7 +378,10 @@ private:
                     body.push_back(var);
                 }
             }
-            return Struct(name,body);
+            match(BRACE);
+            Struct temp = Struct(name,body);
+            cout << temp.toString() << endl;
+            return temp;
         }
         else {
             throwError();
@@ -382,37 +390,30 @@ private:
 
     string typeDef() {
         string expression;
+        string newType;
         if (tokenType() == KEYWORD) {
             expression += match(KEYWORD);
             if (peek() == "struct") {
                 if (nextTokenType() == IDENTIFIER && nextNextTokenType() == IDENTIFIER) {
                     expression += match(KEYWORD) + " " + match(IDENTIFIER);
-                    expression += match(IDENTIFIER) + match(TERMINATOR);
+                    newType = match(IDENTIFIER);
+                    expression += newType + match(TERMINATOR);
                 }
                 else {
-                    Struct temp =structM();
-                }
-            }
-            string temp = type();
-            if (temp == "struct") {
-                string structName;
-                expression += " " + temp;
-                structName = match(IDENTIFIER);
-                expression += " " + structName;
-                if (tokenType() == IDENTIFIER) {
-                    temp = match(IDENTIFIER);
-                    updateType(temp);
-                    expression += " " + temp;
+                    Struct temp = structM();
+                    expression += temp.toString();
+                    newType = match(IDENTIFIER);
+                    expression += " " + newType;
                     expression += match(TERMINATOR);
-                }
-                else if (tokenType() == BRACE) {
-
                 }
             }
             else {
-                expression += " " + match(IDENTIFIER);
+                expression += type();
+                newType = match(IDENTIFIER);
+                expression += " " + newType;
                 expression += match(TERMINATOR);
             }
+            updateType(newType);
             return expression;
         }
         else {
@@ -420,7 +421,23 @@ private:
         }
     }
     vector<string> typedefList() {
-
+        vector<string> list;
+        if (tokenType() == KEYWORD) {
+            list.push_back(typeDef());
+            return typedefList(list);
+        }
+        else {
+            return list;
+        }
+    }
+    vector<string> typedefList(vector<string> list) {
+        if (tokenType() == KEYWORD) {
+            list.push_back(typeDef());
+            return typedefList(list);
+        }
+        else {
+            return list;
+        }
     }
 
 
@@ -443,8 +460,8 @@ public:
             cout << define << endl;
         }
 
-        for (auto token : tokens) {
-            cout << token << endl;
+        for (size_t i = 0; i < tokens.size(); i++) {
+            cout << tokens.at(i) << endl;
         }
 
     }

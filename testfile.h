@@ -17,6 +17,7 @@ typedef struct temp {
 
 class test {
     int data;
+    Temp hold;
 
     //returns data
     int getData() {

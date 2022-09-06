@@ -22,14 +22,15 @@ public:
     : name(name), body(body) {}
 
 
-    string toString() {
+    string toString() const{
         stringstream out;
         out << "struct " << name << " {";
+
         for (auto var : body) {
-            out << var << ";" << endl;
+            //out << var << ";" << endl;
         }
         out << "}";
-        out.str();
+        return out.str();
     }
 };
 

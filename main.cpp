@@ -96,7 +96,7 @@ int main(int argc, char *argv[]) {
 
 
     for (auto token : tokens) {
-        cout << token << endl;
+        //cout << token << endl;
     }
 
     Parser parser(tokens);
