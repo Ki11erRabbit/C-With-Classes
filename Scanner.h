@@ -220,12 +220,13 @@ private:
                 case ']':
                     return {1,{SPECIALCHAR,NONE}};
                 case '(':
-                    return {1,{SPECIALCHAR,OPENPAREN}};
+                    return {1,{SPECIALCHAR,OPEN}};
                 case ')':
-                    return {1,{SPECIALCHAR,CLOSEPAREN}};
+                    return {1,{SPECIALCHAR,CLOSE}};
                 case '{':
+                    return {1, {BRACE, OPEN}};
                 case '}':
-                    return {1, {BRACE, NONE}};
+                    return {1, {BRACE, CLOSE}};
                 case ';':
                     return {1,{TERMINATOR, NONE}};
                 case ',':
@@ -237,7 +238,10 @@ private:
                 case ':':
                 case '?':
                 case '.':
-                    return {1, {OPERATOR,ASSIGNMENT}};
+                    if (input.at(1) == '.') {
+                        return {3,{OPERATOR,TYPE}};
+                    }
+                    return {1, {OPERATOR,ACCESSOR}};
                 case '/':
                     if (input.at(1) == '/')
                         return {findLineCommentEnding(), {COMMENT,NONE} };
@@ -253,7 +257,7 @@ private:
                     if (input.at(1) == '=')
                         return {2, {OPERATOR,NONE}};
                     else if (input.at(1) == '>')
-                        return {2,{OPERATOR,ASSIGNMENT}};
+                        return {2,{OPERATOR,ACCESSOR}};
                     if ( input.at(0) == '=')
                         return {1,{OPERATOR,ASSIGNMENT}};
                     return {1, {OPERATOR,NONE}};

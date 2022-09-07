@@ -12,6 +12,7 @@
 #include "Token.h"
 #include "Class.h"
 #include "Struct.h"
+#include "Method.h"
 
 #define headerFile pair<string,vector<string>>
 using namespace std;
@@ -254,7 +255,7 @@ private:
 
     string expression() {
         string statement;
-        if (tokenType() == SPECIALCHAR && subTokenType() == OPENPAREN) {
+        if (tokenType() == SPECIALCHAR && subTokenType() == OPEN) {
             statement += match(SPECIALCHAR);
             if (tokenType() == KEYWORD) {//typecast
                 statement += match(KEYWORD);
@@ -284,6 +285,14 @@ private:
                 }
             }
         }
+        else if (tokenType() == KEYWORD && subTokenType() == RETURN) {
+            statement += match(KEYWORD);
+            statement += expression();
+        }
+        else if (tokenType() == KEYWORD && subTokenType() == CONTROL) {//goto
+            statement += match(KEYWORD);
+            statement += match(IDENTIFIER);
+        }
         if (tokenType() == OPERATOR && (peek() == "++" || peek() == "--")) {
             statement += match(OPERATOR);
         }
@@ -295,6 +304,10 @@ private:
             }
             if (subTokenType() == SIZEOF) {
                 statement += sizeOf();
+                statement += expression();
+            }
+            if (subTokenType() == ACCESSOR){
+                statement += match(OPERATOR);
                 statement += expression();
             }
             else {
@@ -309,7 +322,7 @@ private:
             }
         }
 
-        if (subTokenType() == CLOSEPAREN || subTokenType() == COMMA || tokenType() == TERMINATOR) {
+        if (subTokenType() == CLOSE || subTokenType() == COMMA || tokenType() == TERMINATOR) {
             return statement;
         }
         statement += expression();
@@ -548,8 +561,6 @@ private:
         }
     }
 
-
-
     void updateType(string identifier) {
         for (size_t i = 0; i < tokens.size(); i++) {
             if (this->tokens.at(i).getType() == IDENTIFIER) {
@@ -689,6 +700,163 @@ private:
         }
         else {
             false;
+        }
+    }
+
+    Parameter methodParameter() {
+        string parameterType, parameterName;
+        if (tokenType() == KEYWORD) {
+            parameterType = type();
+
+            parameterName = match(IDENTIFIER);
+            return Parameter(parameterType, parameterName);
+        }
+        else if (tokenType() == OPERATOR && subTokenType() == TYPE) {//for variable length arguments
+            parameterName = match(OPERATOR);
+            if (tokenType() != SPECIALCHAR) //for when ... is not the last parameter
+                throwError();
+            return Parameter("", parameterName);
+        }
+        else {
+            throwError();
+        }
+    }
+
+    vector<Parameter> methodParameterList() {
+        vector<Parameter> list;
+        if (tokenType() == KEYWORD) {
+            list.push_back(methodParameter());
+            return methodParameterList();
+        }
+        else if (tokenType() == OPERATOR && subTokenType() == COMMA) {// for commas
+            match(OPERATOR);
+            list.push_back(methodParameter());
+            return methodParameterList();
+        }
+        else if (tokenType() == OPERATOR && subTokenType() == TYPE) {//for variable length functions
+            list.push_back(methodParameter());
+            return methodParameterList();
+        }
+        else {
+            return list;
+        }
+    }
+    vector<Parameter> methodParameterList(vector<Parameter> list) {
+        if (tokenType() == KEYWORD) {
+            list.push_back(methodParameter());
+            return methodParameterList();
+        }
+        else if (tokenType() == OPERATOR && subTokenType() == COMMA) {// for commas
+            match(OPERATOR);
+            list.push_back(methodParameter());
+            return methodParameterList();
+        }
+        else if (tokenType() == OPERATOR && subTokenType() == TYPE) {//for variable length functions
+            list.push_back(methodParameter());
+            return methodParameterList();
+        }
+        else {
+            return list;
+        }
+    }
+
+    string controlFlow() {// for ifs, else, for, while, switch
+
+    }
+
+    CodeBlock codeBlock() {
+        vector<Parameter> variables;
+        vector<CodeBlock> codeBlocks;
+        vector<string> lines;
+        string line;
+        string statement;
+
+        if (tokenType() == BRACE) {
+            match(BRACE);
+
+            while (tokenType() != BRACE && subTokenType() != CLOSE) {//makes sure all variables outside of codeblocks are declared
+                if (tokenType() == KEYWORD && subTokenType() == TYPE) {
+                    vector<vector<Parameter>> temp = variableDeclarationList();
+                    for (auto list : temp) {
+                        for (auto param : list) {
+                            variables.push_back(param);
+                        }
+                    }
+                }
+                if (tokenType() == KEYWORD && subTokenType() == CONTROL) {
+                    if (peek() == "case" || peek() == "default") {//for within switch statements
+
+                    }
+                    else if (peek() == "break" || peek() == "continue") {
+
+                    }
+                    else {// for conditionals
+                        statement = controlFlow();
+                        if (tokenType() == BRACE) {
+                            lines.push_back("{}");
+                            codeBlocks.push_back(codeBlock());
+                        }
+                        else {
+                            lines.push_back(expression());
+                        }
+                    }
+                }
+                else if (tokenType() == BRACE && subTokenType() == OPEN) {
+                    lines.push_back("{}");
+                    codeBlocks.push_back(codeBlock());
+                }
+                else {//statements and whatnot
+                    line = expression();
+                    line += match(TERMINATOR);
+                    lines.push_back(line);
+                }
+
+            }
+            match(BRACE);
+            return CodeBlock(statement, variables, lines, codeBlocks);
+        }
+        else {
+            throwError();
+        }
+
+    }
+
+    Method method() {
+        string returnType, methodName;
+        vector<Parameter> parameters;
+        if (tokenType() == KEYWORD) {
+            returnType = type();
+            methodName = match(IDENTIFIER);
+            match(SPECIALCHAR);
+
+            parameters = methodParameterList();
+
+            CodeBlock body = codeBlock();
+
+
+        }
+        else {
+            throwError();
+        }
+    }
+
+    vector<Method> methodList() {
+        vector<Method> list;
+        if (tokenType() == KEYWORD) {
+            list.push_back(method());
+            return methodList(list);
+        }
+        else {
+            return list;
+        }
+    }
+    vector<Method> methodList(vector<Method> list) {
+        if (tokenType() == KEYWORD) {
+            list.push_back(method());
+            return methodList(list);
+        }
+        else {
+            return list;
         }
     }
 

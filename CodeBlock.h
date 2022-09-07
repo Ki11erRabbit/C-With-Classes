@@ -10,27 +10,47 @@
 #include <sstream>
 #include <vector>
 
+#include "Parameter.h"
+
 class CodeBlock {
 private:
-    std::string line;
-    std::vector<std::string> lines;
+    std::string statement;//for like if, else, for, while
+    std::vector<CodeBlock> codeBlocks;
+    std::vector<std::string> lines;// code blocks get injected in order of discovery
+    std::vector<Parameter> variables;
+    size_t currentBlock = 0;
 
 public:
-    CodeBlock(std::vector<std::string> lines)
-    : lines(lines) {}
 
-    std::string toString() const{
+    CodeBlock(std::string statement, std::vector<Parameter> variables, std::vector<std::string> lines, std::vector<CodeBlock> codeBlocks)
+    : statement(statement),variables(variables),lines(lines),codeBlocks(codeBlocks) {}
+
+    void incrementCurrentBlock() {
+        currentBlock += 1;
+    }
+
+    std::string toString() {
         std::stringstream out;
-
+        if (statement != "")
+            out << statement << " ";
         out << "{" << std::endl;
+        for (auto var : variables) {
+            out << var << ";" << std::endl;
+        }
         for (auto line : lines) {
-            out << line << std::endl;
+            if ( line == "{}") {
+                out << codeBlocks.at(currentBlock);
+                incrementCurrentBlock();
+            }
+            else {
+                out << line << std::endl;
+            }
         }
         out << "}" << std::endl;
         return out.str();
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const CodeBlock& body)
+    friend std::ostream& operator<<(std::ostream& os, CodeBlock& body)
     {
         os << body.toString();
         return os;

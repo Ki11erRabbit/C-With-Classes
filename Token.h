@@ -13,7 +13,7 @@ enum TokenType {
 };
 
 enum SubTokenType {//for keywords and operators
-    NONE=0,TYPE=1, CONTROL=2, CODE=3, ASSIGNMENT, SIZEOF, RETURN, COMMA, OPENPAREN, CLOSEPAREN
+    NONE=0,TYPE=1, CONTROL=2, CODE=3, ASSIGNMENT, SIZEOF, RETURN, COMMA, OPEN, CLOSE, ACCESSOR
 };
 
 class Token {
@@ -69,10 +69,12 @@ private:
                 return "RETURN";
             case COMMA:
                 return "COMMA";
-            case OPENPAREN:
-                return "OPENPAREN";
-            case CLOSEPAREN:
-                return "CLOSEPAREN";
+            case OPEN:
+                return "OPEN";
+            case CLOSE:
+                return "CLOSE";
+            case ACCESSOR:
+                return "ACCESSOR";
             default:
                 return "UNDEFINED";
         }
