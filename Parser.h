@@ -331,30 +331,7 @@ private:
         string output;
         output += expression();
         return  output;
-        if (tokenType() == IDENTIFIER) {//variable
-            output += match(IDENTIFIER);
-            if (subTokenType() == ASSIGNMENT) {//for structs -> or .
-                output += match(OPERATOR);
-                output += match(IDENTIFIER);
-            }
-        }
-        else if (tokenType() == OPERATOR && nextTokenType() == IDENTIFIER) {//dereference/reference
-            output += match(OPERATOR);
-            output += match(IDENTIFIER);
-        }
-        else if (subTokenType() == SIZEOF) {
-            output += sizeOf();
-        }
-        else if (tokenType() == STRING) {
-            output += match(STRING);
-        }
-        else if (tokenType() == CONSTANT) {
-            output += match(CONSTANT);
-        }
-        else {
-            output += expression();
-        }
-        return output;
+
     }
     vector<string> parameterList() {
         vector<string> list;
@@ -456,18 +433,8 @@ private:
                     if (tokenType() == IDENTIFIER) {//function
                         contents = functionCall();
                     }
-                    else if (tokenType() == CONSTANT) {
-                        contents = match(CONSTANT);
-                    }
-                    else if (tokenType() == STRING) {
-                        contents = match(STRING);
-                    }
-                    else if (tokenType() == OPERATOR && nextTokenType() == IDENTIFIER) {//dereference * or address &
-                        contents += match(OPERATOR);
-                        contents += match(IDENTIFIER);
-                    }
-                    else if (subTokenType() == SIZEOF) {
-                        contents += sizeOf();
+                    else {
+                        contents = expression();
                     }
                 }
                 else {
@@ -524,11 +491,8 @@ private:
                 if (tokenType() == IDENTIFIER) {//function
                     contents = functionCall();
                 }
-                else if (tokenType() == CONSTANT) {
-                    contents = match(CONSTANT);
-                }
-                else if (tokenType() == STRING) {
-                    contents = match(STRING);
+                else {
+                    contents = expression();
                 }
             }
             else {
@@ -536,6 +500,23 @@ private:
             }
             varList.push_back(Parameter(varType,pointer,varName,contents));
             return variableDeclaration(varList, varType);
+        }
+        else if (tokenType() == SPECIALCHAR) {//for array declaration
+            varName += match(SPECIALCHAR);
+            if (tokenType() == CONSTANT) {
+                varName += match(CONSTANT);
+            }
+            varName += match(SPECIALCHAR);
+            if (tokenType() == SPECIALCHAR) {//for multidimentional array declaration
+                varName += match(SPECIALCHAR);
+                if (tokenType() == CONSTANT) {
+                    varName += match(CONSTANT);
+                }
+                varName += match(SPECIALCHAR);
+            }
+            if (tokenType() == BRACE) {
+                contents += expression();
+            }
         }
         varList.push_back(Parameter(varType,pointer,varName,contents));
         if (tokenType() == TERMINATOR) {
