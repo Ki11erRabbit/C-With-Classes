@@ -19,7 +19,6 @@ using namespace std;
 class Parser {
 private:
     vector<Token> tokens;
-    string className;
 
     TokenType tokenType() const {
         return tokens.at(0).getType();
@@ -265,7 +264,10 @@ private:
                 return type;
             }
             while (tokenType() == KEYWORD && subTokenType() == TYPE) {
-                type += match(KEYWORD) + " ";
+                type += match(KEYWORD);
+                if (nextTokenType() == KEYWORD && nextSubTokenType() == TYPE) {
+                    type += " ";
+                }
             }
             return type;
         }
@@ -478,6 +480,100 @@ private:
         }
     }
 
+    bool isMethod() {
+        size_t i = 0;
+        while (tokens.at(i).getSubType() == TYPE) {
+            i++;
+        }
+        if (tokens.at(i).getType() == IDENTIFIER) {
+            if (tokens.at(i+1).getType() == SPECIALCHAR)
+                return true;
+            else
+                return false;
+        }
+        else {
+            false;
+        }
+    }
+    bool isMember() {
+        size_t i = 0;
+        while (tokens.at(i).getSubType() == TYPE) {
+            i++;
+        }
+        if (tokens.at(i).getType() == IDENTIFIER) {
+            if (tokens.at(i+1).getType() == OPERATOR || tokens.at(i+1).getType() == TERMINATOR)
+                return true;
+            else
+                return false;
+        }
+        else {
+            false;
+        }
+    }
+
+    Class classM() {
+        string className;
+        vector<Parameter> classMembers;
+        if (tokenType() == KEYWORD && peek() == "class") {
+            match(KEYWORD);
+            className = match(IDENTIFIER);
+            match(BRACE);
+            while (tokenType() != BRACE && nextTokenType() != TERMINATOR) {
+                if (isMember()) {//for class members
+                    vector<vector<Parameter>> temp = variableDeclarationList();
+                    for (auto list : temp) {
+                        for (auto param : list) {
+                            classMembers.push_back(param);
+                        }
+                    }
+                }
+                else if (isMethod()){//for method building
+                    matchUntil(BRACE);
+                    match(BRACE);
+                    matchUntil(BRACE);
+                    match(BRACE);
+                }
+                else {
+                    if (tokenType() == COMMENT) {
+                        matchAll();
+                        continue;
+                    }
+                    matchAll();//for testing purposes
+                    //throwError();
+                }
+            }
+            match(BRACE);
+            match(TERMINATOR);
+            return Class(className, classMembers);
+        }
+        else {
+            throwError();
+        }
+    }
+
+    vector<Class> classList() {
+        vector<Class> list;
+        if (tokenType() == KEYWORD && peek() == "class") {
+            list.push_back(classM());
+            return classList(list);
+        }
+        else {
+            return list;
+        }
+    }
+    vector<Class> classList(vector<Class> list) {
+        if (tokens.size() == 0) {
+            return list;
+        }
+        if (tokenType() == KEYWORD && peek() == "class") {
+            list.push_back(classM());
+            return classList(list);
+        }
+        else {
+            return list;
+        }
+    }
+
 
 public:
 
@@ -489,8 +585,9 @@ public:
         vector<string> macros;
         vector<string> typeDefs;
         vector<Struct> structs;
+        vector<Class> classes;
         int i = 0;
-        while (i < 8) {
+        while (!tokens.empty()) {
             if (tokenType() == PREPROC) {
                 if (peek() == "#include") {
                     vector<string> tempIncludes = includeList();
@@ -518,12 +615,15 @@ public:
                         structs.push_back(strucT);
                     }
                 }
+                if (peek() == "class") {
+                    vector<Class> tempClasses = classList();
+                    for (auto clasS : tempClasses) {
+                        classes.push_back(clasS);
+                    }
+                }
             }
             i++;
         }
-
-
-
 
         for (auto include : includes) {
             cout << include << endl;
@@ -536,6 +636,9 @@ public:
         }
         for (auto strucT : structs) {
             cout << strucT << endl;
+        }
+        for (auto clasS : classes) {
+            cout << clasS << endl;
         }
 
         for (size_t i = 0; i < tokens.size(); i++) {

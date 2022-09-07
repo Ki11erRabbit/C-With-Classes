@@ -10,7 +10,7 @@
 #include <iostream>
 
 #include "Parameter.h"
-#include "Method.h"
+//#include "Method.h"
 
 using namespace std;
 
@@ -18,10 +18,10 @@ class Class {
 private:
     string className;
     vector<Parameter> members;
-    vector<Method> methods;
+    /*vector<Method> methods;
     Method constructor;
     Method constructorPointer;
-    Method deconstructor;
+    Method deconstructor;*/
 
     string makeStruct() {
         stringstream out;
@@ -34,24 +34,26 @@ private:
                 out << "\t" << member << ";" << endl;
             }
         }
-        for (auto method : methods) {
+        /*for (auto method : methods) {
             out << method.pointerForm() << endl;
-        }
+        }*/
         out << "} " << className << ";" << endl;
     }
 public:
+    Class(const string &className, const vector<Parameter> &members)
+    : className(className), members(members) {};
 
     string makeSource() {
         stringstream out;
         out << "#include \"" << className << ".h\"" << endl << endl;
 
-        out << constructor.functionForm() << endl << endl;
+        /*out << constructor.functionForm() << endl << endl;
         out << constructorPointer.functionForm() << endl << endl;
-        out << deconstructor.functionForm() << endl << endl;
+        out << deconstructor.functionForm() << endl << endl;*/
 
-        for (auto method : methods) {
+        /*for (auto method : methods) {
             out << method.functionForm() << endl << endl;
-        }
+        }*/
     }
 
     string makeHeader() {
@@ -59,10 +61,28 @@ public:
 
         out << makeStruct() << endl << endl;
 
-        out << constructor.definitionForm() << endl << endl;
+        /*out << constructor.definitionForm() << endl << endl;
         out << constructorPointer.definitionForm() << endl << endl;
-        out << deconstructor.definitionForm() << endl << endl;
+        out << deconstructor.definitionForm() << endl << endl;*/
 
+    }
+
+    string toString() const{
+        stringstream out;
+
+        out << "class " << className << " {" << endl;
+        for (auto member: members) {
+            out << member << endl;
+        }
+        out << "};" << endl;
+
+        return out.str();
+    }
+
+    friend std::ostream& operator<<(std::ostream& os, const Class& clasS)
+    {
+        os << clasS.toString();
+        return os;
     }
 };
 

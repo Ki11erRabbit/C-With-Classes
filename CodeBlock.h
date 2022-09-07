@@ -27,6 +27,7 @@ public:
             out << line << std::endl;
         }
         out << "}" << std::endl;
+        return out.str();
     }
 
     friend std::ostream& operator<<(std::ostream& os, const CodeBlock& body)
