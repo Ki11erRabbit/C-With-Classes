@@ -220,8 +220,9 @@ private:
                 case ']':
                     return {1,{SPECIALCHAR,NONE}};
                 case '(':
+                    return {1,{SPECIALCHAR,OPENPAREN}};
                 case ')':
-                    return {1,{SPECIALCHAR,NONE}};
+                    return {1,{SPECIALCHAR,CLOSEPAREN}};
                 case '{':
                 case '}':
                     return {1, {BRACE, NONE}};
