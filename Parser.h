@@ -272,6 +272,9 @@ private:
         else if (tokenType() == OPERATOR) { // ++var or *var dereferense
             if (peek() == "*" || peek() == "++" || peek() == "--") {
                 statement += match(OPERATOR);
+                if (peek() == "*") {
+                    statement += match(OPERATOR);
+                }
             }
         }
         if (tokenType() == OPERATOR && (peek() == "++" || peek() == "--")) {
@@ -286,6 +289,13 @@ private:
             if (subTokenType() == SIZEOF) {
                 statement += sizeOf();
                 statement += expression();
+            }
+        }
+        if (tokenType() == BRACE) {
+            statement += match(BRACE);
+            vector<string> tokenString = matchUntil(BRACE);
+            for (auto token : tokenString) {
+                statement += token;
             }
         }
 
@@ -392,13 +402,15 @@ private:
         }
     }
 
-    vector<Parameter> variableDeclaration() {
+    vector<Parameter> variableDeclaration() {//TODO: make use expression()
         string varType,varName, pointer, contents;
         vector<Parameter> varList;
         if (tokenType() == KEYWORD) {
             varType = type();
             if (tokenType() == OPERATOR) {//for pointers
                 pointer = match(OPERATOR);
+                if (tokenType() == OPERATOR)//for pointer of pointers
+                    pointer += match(OPERATOR);
             }
             varName = match(IDENTIFIER);
             if (tokenType() == OPERATOR) {
@@ -426,6 +438,23 @@ private:
                 }
                 varList.push_back(Parameter(varType,pointer,varName,contents));
                 return variableDeclaration(varList, varType);
+            }
+            else if (tokenType() == SPECIALCHAR) {//for array declaration
+                varName += match(SPECIALCHAR);
+                if (tokenType() == CONSTANT) {
+                    varName += match(CONSTANT);
+                }
+                varName += match(SPECIALCHAR);
+                if (tokenType() == SPECIALCHAR) {//for multidimentional array declaration
+                    varName += match(SPECIALCHAR);
+                    if (tokenType() == CONSTANT) {
+                        varName += match(CONSTANT);
+                    }
+                    varName += match(SPECIALCHAR);
+                }
+                if (tokenType() == BRACE) {
+                    contents += expression();
+                }
             }
             varList.push_back(Parameter(varType,pointer,varName,contents));
             if (tokenType() == TERMINATOR) {
