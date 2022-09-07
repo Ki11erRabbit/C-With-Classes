@@ -35,7 +35,13 @@ public:
 
     std::string toString() const{
         std::stringstream out;
-        out << type << " " << name;
+        out << type << " ";
+        if (pointer != "" )
+            out << pointer;
+        out << name;
+        if (storedValue != "") {
+            out << " = " << storedValue;
+        }
 
         return out.str();
     }

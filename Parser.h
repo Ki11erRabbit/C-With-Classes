@@ -261,6 +261,7 @@ private:
                 if (tokenType() == OPERATOR) //pointer
                     statement += match(OPERATOR);
                 match(SPECIALCHAR);//CLOSE Paren
+                statement += expression();
             }
             else {//for additional statements
                 statement += expression();
@@ -268,6 +269,12 @@ private:
         }
         else if (tokenType() == IDENTIFIER) {
             statement += match(IDENTIFIER);
+        }
+        else if (tokenType() == CONSTANT) {
+            statement += match(CONSTANT);
+        }
+        else if (tokenType() == STRING) {
+            statement += match(STRING);
         }
         else if (tokenType() == OPERATOR) { // ++var or *var dereferense
             if (peek() == "*" || peek() == "++" || peek() == "--") {
@@ -289,6 +296,9 @@ private:
             if (subTokenType() == SIZEOF) {
                 statement += sizeOf();
                 statement += expression();
+            }
+            else {
+                statement += match(OPERATOR);
             }
         }
         if (tokenType() == BRACE) {
@@ -319,8 +329,14 @@ private:
 
     string parameter() {
         string output;
+        output += expression();
+        return  output;
         if (tokenType() == IDENTIFIER) {//variable
             output += match(IDENTIFIER);
+            if (subTokenType() == ASSIGNMENT) {//for structs -> or .
+                output += match(OPERATOR);
+                output += match(IDENTIFIER);
+            }
         }
         else if (tokenType() == OPERATOR && nextTokenType() == IDENTIFIER) {//dereference/reference
             output += match(OPERATOR);
@@ -346,12 +362,28 @@ private:
             list.push_back(parameter());
             return parameterList(list);
         }
+        else if (tokenType() == CONSTANT) {
+            list.push_back(parameter());
+            return parameterList(list);
+        }
+        else if (tokenType() == STRING) {
+            list.push_back(parameter());
+            return parameterList(list);
+        }
         else {
             return list;
         }
     }
     vector<string> parameterList(vector<string> list) {
         if (tokenType() == IDENTIFIER || (tokenType() == OPERATOR && peek() == "*")) {
+            list.push_back(parameter());
+            return parameterList(list);
+        }
+        else if (tokenType() == CONSTANT) {
+            list.push_back(parameter());
+            return parameterList(list);
+        }
+        else if (tokenType() == STRING) {
             list.push_back(parameter());
             return parameterList(list);
         }
@@ -412,7 +444,12 @@ private:
                 if (tokenType() == OPERATOR)//for pointer of pointers
                     pointer += match(OPERATOR);
             }
-            varName = match(IDENTIFIER);
+            if (tokenType() == IDENTIFIER) {
+                varName = match(IDENTIFIER);
+            }
+            else if (tokenType() == TERMINATOR) {
+                return varList;
+            }
             if (tokenType() == OPERATOR) {
                 if (subTokenType() == ASSIGNMENT) {
                     match(OPERATOR);
@@ -475,7 +512,12 @@ private:
         if (tokenType() == OPERATOR) {//for pointers
             pointer = match(OPERATOR);
         }
-        varName = match(IDENTIFIER);
+        if (tokenType() == IDENTIFIER) {
+            varName = match(IDENTIFIER);
+        }
+        else if (tokenType() == TERMINATOR) {
+            return varList;
+        }
         if (tokenType() == OPERATOR) {
             if (subTokenType() == ASSIGNMENT) {
                 match(OPERATOR);

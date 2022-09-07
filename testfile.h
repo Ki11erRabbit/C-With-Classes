@@ -34,7 +34,7 @@ struct bob {
     int y;
 };
 class test {
-    int data;
+    int data = add(2,2,"hello");
     Temp hold;
     hello world;
 

@@ -237,7 +237,7 @@ private:
                 case ':':
                 case '?':
                 case '.':
-                    return {1, {OPERATOR,NONE}};
+                    return {1, {OPERATOR,ASSIGNMENT}};
                 case '/':
                     if (input.at(1) == '/')
                         return {findLineCommentEnding(), {COMMENT,NONE} };
@@ -251,9 +251,11 @@ private:
                 case '+':
                 case '-':
                     if (input.at(1) == '=')
-                        return {2, {OPERATOR,ASSIGNMENT}};
+                        return {2, {OPERATOR,NONE}};
                     else if (input.at(1) == '>')
                         return {2,{OPERATOR,ASSIGNMENT}};
+                    if ( input.at(0) == '=')
+                        return {1,{OPERATOR,ASSIGNMENT}};
                     return {1, {OPERATOR,NONE}};
                     //logical and bitwise Operators
                 case '&':
