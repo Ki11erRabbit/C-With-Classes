@@ -251,8 +251,124 @@ private:
         }
     }
 
-    string functionCall() {
 
+    string expression() {
+        string statement;
+        if (tokenType() == SPECIALCHAR && subTokenType() == OPENPAREN) {
+            statement += match(SPECIALCHAR);
+            if (tokenType() == KEYWORD) {//typecast
+                statement += match(KEYWORD);
+                if (tokenType() == OPERATOR) //pointer
+                    statement += match(OPERATOR);
+                match(SPECIALCHAR);//CLOSE Paren
+            }
+            else {//for additional statements
+                statement += expression();
+            }
+        }
+        else if (tokenType() == IDENTIFIER) {
+            statement += match(IDENTIFIER);
+        }
+        else if (tokenType() == OPERATOR) { // ++var or *var dereferense
+            if (peek() == "*" || peek() == "++" || peek() == "--") {
+                statement += match(OPERATOR);
+            }
+        }
+        if (tokenType() == OPERATOR && (peek() == "++" || peek() == "--")) {
+            statement += match(OPERATOR);
+        }
+        // operator
+        if (tokenType() == OPERATOR) {
+            if (subTokenType() == ASSIGNMENT) {
+                statement += match(OPERATOR);
+                statement += expression();
+            }
+            if (subTokenType() == SIZEOF) {
+                statement += sizeOf();
+                statement += expression();
+            }
+        }
+
+        if (subTokenType() == CLOSEPAREN || subTokenType() == COMMA || tokenType() == TERMINATOR) {
+            return statement;
+        }
+        statement += expression();
+    }
+
+    string sizeOf() {
+        string expression;
+        expression += match(OPERATOR);
+        expression += match(SPECIALCHAR);
+        vector<string> statement = matchUntil(SPECIALCHAR);
+        for (auto state : statement) {
+            expression += state;
+        }
+        expression += match(SPECIALCHAR);
+        return expression;
+    }
+
+    string parameter() {
+        string output;
+        if (tokenType() == IDENTIFIER) {//variable
+            output += match(IDENTIFIER);
+        }
+        else if (tokenType() == OPERATOR && nextTokenType() == IDENTIFIER) {//dereference/reference
+            output += match(OPERATOR);
+            output += match(IDENTIFIER);
+        }
+        else if (subTokenType() == SIZEOF) {
+            output += sizeOf();
+        }
+        else if (tokenType() == STRING) {
+            output += match(STRING);
+        }
+        else if (tokenType() == CONSTANT) {
+            output += match(CONSTANT);
+        }
+        else {
+            output += expression();
+        }
+        return output;
+    }
+    vector<string> parameterList() {
+        vector<string> list;
+        if (tokenType() == IDENTIFIER || (tokenType() == OPERATOR && peek() == "*")) {
+            list.push_back(parameter());
+            return parameterList(list);
+        }
+        else {
+            return list;
+        }
+    }
+    vector<string> parameterList(vector<string> list) {
+        if (tokenType() == IDENTIFIER || (tokenType() == OPERATOR && peek() == "*")) {
+            list.push_back(parameter());
+            return parameterList(list);
+        }
+        else {
+            return list;
+        }
+    }
+
+    string functionCall() {
+        if (tokenType() == IDENTIFIER) {
+            string expression;
+            expression += match(IDENTIFIER);
+            expression += match(SPECIALCHAR);
+            vector<string> paramList = parameterList();
+            for (size_t i = 0; i < paramList.size(); i++) {
+                expression += paramList.at(i);
+                if (i < paramList.size() - 1) {
+                    expression += ",";
+                }
+            }
+            expression += match(SPECIALCHAR);
+
+            return expression;
+        }
+        else {
+            throwError();
+        }
     }
 
     string type() {//mashes type tokens together
@@ -296,6 +412,13 @@ private:
                     }
                     else if (tokenType() == STRING) {
                         contents = match(STRING);
+                    }
+                    else if (tokenType() == OPERATOR && nextTokenType() == IDENTIFIER) {//dereference * or address &
+                        contents += match(OPERATOR);
+                        contents += match(IDENTIFIER);
+                    }
+                    else if (subTokenType() == SIZEOF) {
+                        contents += sizeOf();
                     }
                 }
                 else {
