@@ -41,7 +41,7 @@ private:
     int findMultiLineCommentEnding(){
         for (size_t i = 1; i < input.size(); i++) {
             if (input.at(i) == '*' && input.at(i+1) == '/')
-                return i+1;
+                return i+2;
         }
     }
     int findNumEnding() {
