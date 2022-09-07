@@ -72,7 +72,7 @@ public:
 
         out << "class " << className << " {" << endl;
         for (auto member: members) {
-            out << member << endl;
+            out << member << ";" << endl;
         }
         out << "};" << endl;
 

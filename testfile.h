@@ -27,7 +27,7 @@ struct jes {
 };
 struct phil {
     int x,z;
-    int y;
+    int **y;
 };
 struct bob {
     int x,z;
@@ -35,8 +35,8 @@ struct bob {
 };
 class test {
     int data = add(2,2,"hello");
-    Temp hold;
-    hello world;
+    Temp *hold;
+    hello world[1][3];
 
     //returns data
     int getData() {

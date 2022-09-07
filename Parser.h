@@ -660,6 +660,9 @@ private:
         while (tokens.at(i).getSubType() == TYPE) {
             i++;
         }
+        if (tokens.at(i).getType() == OPERATOR) {//pointer
+            i++;
+        }
         if (tokens.at(i).getType() == IDENTIFIER) {
             if (tokens.at(i+1).getType() == SPECIALCHAR)
                 return true;
@@ -673,6 +676,9 @@ private:
     bool isMember() {
         size_t i = 0;
         while (tokens.at(i).getSubType() == TYPE) {
+            i++;
+        }
+        if (tokens.at(i).getType() == OPERATOR) {//pointer
             i++;
         }
         if (tokens.at(i).getType() == IDENTIFIER) {
@@ -696,6 +702,10 @@ private:
             while (tokenType() != BRACE && nextTokenType() != TERMINATOR) {
                 if (isMember()) {//for class members
                     vector<vector<Parameter>> temp = variableDeclarationList();
+                    if (tokenType() == COMMENT) {
+                        match(COMMENT);
+                    }
+                    //match(TERMINATOR);
                     for (auto list : temp) {
                         for (auto param : list) {
                             classMembers.push_back(param);
@@ -713,7 +723,7 @@ private:
                         matchAll();
                         continue;
                     }
-                    matchAll();//for testing purposes
+                    matchAll();//for testing purposes in the future it should match a TERMINATOR
                     //throwError();
                 }
             }
