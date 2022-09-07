@@ -185,7 +185,7 @@ private:
                 return {6,{KEYWORD,TYPE}};
             }
             else if (input.find("sizeof") == 0) {
-                return {6, {KEYWORD,SIZEOF}};
+                return {6, {OPERATOR,SIZEOF}};
             }
             else if (input.find("union") == 0) {
                 return {5, {KEYWORD,TYPE}};
