@@ -21,6 +21,9 @@ private:
     CodeBlock body;
 
 public:
+    Method(string returnType, string methodName, vector<Parameter> parameters,CodeBlock body)
+    : returnType(returnType),methodName(methodName),parameters(parameters), body(body) {}
+
     string pointerForm() {
         stringstream out;
 

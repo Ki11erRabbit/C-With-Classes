@@ -508,7 +508,7 @@ private:
             if (tokenType() == OPERATOR) {
                 if (subTokenType() == ASSIGNMENT) {
                     match(OPERATOR);
-                    if (tokenType() == IDENTIFIER) {//function
+                    if (tokenType() == IDENTIFIER && nextTokenType() == SPECIALCHAR) {//function
                         contents = functionCall();
                     }
                     else {
@@ -848,9 +848,10 @@ private:
                 }
 
                 statement += match(TERMINATOR);
-                if (tokenType() == OPERATOR || tokenType() == IDENTIFIER) {
-                    statement += expression();
+                while (tokenType() != SPECIALCHAR) {
+                    statement += expression() + ",";
                 }
+                statement.pop_back();//removes the extra , at the end
                 statement += match(SPECIALCHAR);
 
             }
@@ -894,6 +895,7 @@ private:
                             variables.push_back(param);
                         }
                     }
+                    match(TERMINATOR);
                 }
                 if (tokenType() == KEYWORD && subTokenType() == CONTROL) {
                     if (peek() == "case" || peek() == "default") {//for within switch statements
@@ -929,6 +931,9 @@ private:
                     lines.push_back(line);
                     line = "";
                 }
+                if (tokens.empty()) {
+                    break;
+                }
             }
             match(BRACE);
             return CodeBlock(statement, variables, lines, codeBlocks);
@@ -949,9 +954,10 @@ private:
 
             parameters = methodParameterList();
 
+            match(SPECIALCHAR);
             CodeBlock body = codeBlock();
 
-
+            return Method(returnType, methodName, parameters, body);
         }
         else {
             throwError();
@@ -981,6 +987,7 @@ private:
     Class classM() {
         string className;
         vector<Parameter> classMembers;
+        vector<Method> classMethods;
         if (tokenType() == KEYWORD && peek() == "class") {
             match(KEYWORD);
             className = match(IDENTIFIER);
@@ -999,10 +1006,11 @@ private:
                     }
                 }
                 else if (isMethod()){//for method building
-                    matchUntil(BRACE);
+                    /*matchUntil(BRACE);
                     match(BRACE);
                     matchUntil(BRACE);
-                    match(BRACE);
+                    match(BRACE);*/
+                    classMethods = methodList();
                 }
                 else {
                     if (tokenType() == COMMENT) {
