@@ -310,7 +310,7 @@ private:
                 statement += match(OPERATOR);
                 statement += expression();
             }
-            else {
+            else if (!subTokenType() == COMMA){
                 statement += match(OPERATOR);
             }
         }
@@ -761,7 +761,54 @@ private:
     }
 
     string controlFlow() {// for ifs, else, for, while, switch
+        string statement;
+        if (tokenType() == KEYWORD) {
+            if (peek() == "for") {
+                statement += match(KEYWORD);
+                statement += match((SPECIALCHAR));
+                if (tokenType() == KEYWORD || tokenType() == IDENTIFIER) {
+                    vector<vector<Parameter>> vars = variableDeclarationList();
+                    for (size_t i = 0; i < vars.size(); i++) {
+                        for (size_t j = 0; j < vars.at(i).size(); i++) {
+                            statement += vars.at(i).at(j).toString();
+                            if (i < vars.size()-1 && j < vars.at(i).size()-1) {
+                                statement += ",";
+                            }
+                        }
+                    }
+                }
+                statement += match(TERMINATOR);
+                if (tokenType() == IDENTIFIER || tokenType() == CONSTANT) {
+                    statement += expression();
+                }
 
+                statement += match(TERMINATOR);
+                if (tokenType() == OPERATOR || tokenType() == IDENTIFIER) {
+                    statement += expression();
+                }
+                statement += match(SPECIALCHAR);
+
+            }
+            if (peek() == "else") {
+                statement += match(KEYWORD);
+            }
+            else if (peek() == "switch") {
+                statement += match(KEYWORD);
+                statement += match(SPECIALCHAR);
+                statement += expression();
+                statement += match(SPECIALCHAR);
+            }
+            else {//for while and if
+                statement += match(KEYWORD);
+                statement += match(SPECIALCHAR);
+                statement += expression();
+                statement += match(SPECIALCHAR);
+            }
+            return statement;
+        }
+        else {
+            throwError();
+        }
     }
 
     CodeBlock codeBlock() {
