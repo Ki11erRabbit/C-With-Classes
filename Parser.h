@@ -253,7 +253,7 @@ private:
     }
 
 
-    string expression() {
+    /*string expression() {
         string statement;
         if (tokenType() == SPECIALCHAR && subTokenType() == OPEN) {
             statement += match(SPECIALCHAR);
@@ -323,6 +323,71 @@ private:
         }
 
         if (subTokenType() == CLOSE || subTokenType() == COMMA || tokenType() == TERMINATOR) {
+            return statement;
+        }
+        statement += expression();
+    }*/
+
+    string expression() {
+        string statement;
+
+        if (tokenType() == SPECIALCHAR && subTokenType() == OPEN) {//type casts or nested expressions
+            statement += match(SPECIALCHAR);
+            if (tokenType() == KEYWORD) {//typecast
+                if (peek() == "struct") {
+                    statement += match(KEYWORD);
+                    statement += " " + match(IDENTIFIER);
+                }
+                else {
+                    statement += match(KEYWORD);
+                }
+                if (tokenType() == OPERATOR) {//pointer casts
+                    statement += match(OPERATOR);
+                }
+                if (tokenType() == OPERATOR) {//pointer of pointers casts
+                    statement += match(OPERATOR);
+                }
+            }
+            else {//nested expressions
+                statement += expression();
+            }
+            statement+= match(SPECIALCHAR);//closing paren
+        }
+        else if (tokenType() == OPERATOR) {//operators
+            if (subTokenType() == SIZEOF) {
+                statement += sizeOf();
+            }
+            else {
+                statement += match(OPERATOR);
+            }
+        }
+        else if (tokenType() == BRACE) {
+            statement += match(BRACE);
+            vector<string> list = matchUntil(BRACE);
+            for (auto item : list) {
+                statement += item;
+            }
+            statement += match(BRACE);
+        }
+        else if (tokenType() == CONSTANT) {
+            statement += match(CONSTANT);
+        }
+        else if (tokenType() == STRING) {
+            statement += match(STRING);
+        }
+        else if (tokenType() == IDENTIFIER) {
+            statement += match(IDENTIFIER);
+        }
+        else if (tokenType() == KEYWORD) {
+            if (peek() == "return") {
+                statement += match(KEYWORD) + " ";
+            }
+        }
+
+        if (subTokenType() == CLOSE || subTokenType() == COMMA || tokenType() == TERMINATOR) {
+            if (subTokenType() == COMMA) {
+                match(OPERATOR);
+            }
             return statement;
         }
         statement += expression();
@@ -413,7 +478,7 @@ private:
             }
             while (tokenType() == KEYWORD && subTokenType() == TYPE) {
                 type += match(KEYWORD);
-                if (nextTokenType() == KEYWORD && nextSubTokenType() == TYPE) {
+                if (tokenType() == KEYWORD && subTokenType() == TYPE) {
                     type += " ";
                 }
             }

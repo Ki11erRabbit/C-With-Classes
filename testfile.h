@@ -26,7 +26,7 @@ struct jes {
     int y;
 };
 struct phil {
-    int x,z;
+    int x = ++((int*)al) * 7 * sizeof(long),z;
     int **y;
 };
 struct bob {
