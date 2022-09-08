@@ -832,10 +832,16 @@ private:
                 }
                 if (tokenType() == KEYWORD && subTokenType() == CONTROL) {
                     if (peek() == "case" || peek() == "default") {//for within switch statements
-
+                        line += match(KEYWORD);
+                        line += match(OPERATOR);
+                        lines.push_back(line);
+                        line = "";
                     }
                     else if (peek() == "break" || peek() == "continue") {
-
+                        line += match(KEYWORD);
+                        line += match(TERMINATOR);
+                        lines.push_back(line);
+                        line = "";
                     }
                     else {// for conditionals
                         statement = controlFlow();
@@ -856,8 +862,8 @@ private:
                     line = expression();
                     line += match(TERMINATOR);
                     lines.push_back(line);
+                    line = "";
                 }
-
             }
             match(BRACE);
             return CodeBlock(statement, variables, lines, codeBlocks);
