@@ -62,6 +62,9 @@ public:
         stringstream out;
 
         out << returnType << " " << className << "__" << methodName << "(";
+        out << className << "* " << "this";
+        if (!parameters.empty())
+            out << ", ";
         for (size_t i = 0; i < parameters.size(); i++) {
             out << parameters.at(i).getType() << " " << parameters.at(i).getName();
             if (i < parameters.size()-1)
@@ -75,7 +78,10 @@ public:
     string definitionForm(string className) {
         stringstream out;
 
-        out << returnType << " " <<className << "__" << methodName << "(";
+        out << returnType << " " << className << "__" << methodName << "(";
+        out << className << "* " << "this";
+        if (!parameters.empty())
+            out << ", ";
         for (size_t i = 0; i < parameters.size(); i++) {
             out << parameters.at(i).getType() << " " << parameters.at(i).getName();
             if (i < parameters.size()-1)
