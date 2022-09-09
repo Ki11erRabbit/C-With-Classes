@@ -33,6 +33,24 @@ public:
     std::string getName() {
         return name;
     }
+    std::string getStoredValue() {
+        return storedValue;
+    }
+    void setStoredValue(std::string value) {
+        storedValue = value;
+    }
+
+    std::string printWOType() const{
+        std::stringstream out;
+        if (pointer != "" )
+            out << pointer;
+        out << name;
+        if (storedValue != "") {
+            out << " = " << storedValue;
+        }
+
+        return out.str();
+    }
 
     std::string toString() const{
         std::stringstream out;

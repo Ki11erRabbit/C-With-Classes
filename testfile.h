@@ -49,15 +49,15 @@ class test {
      * multiline comment
      */
     void setData(int data) {
-        while (0)
-        switch(data)
+
+        do
         {
             case 0:
                 break;
             default:
             this->data = data;
             break;
-        }
+        } while (0);
         this->data = data;
     }
 

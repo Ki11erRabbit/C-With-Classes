@@ -24,12 +24,17 @@ private:
 
 public:
 
+    CodeBlock() {
+
+    }
     CodeBlock(std::string statement, std::vector<Parameter> variables, std::vector<Enum> enums, std::vector<std::string> lines, std::vector<CodeBlock> codeBlocks)
     : statement(statement),variables(variables),enums(enums), lines(lines),codeBlocks(codeBlocks) {}
 
     CodeBlock(std::string statement, std::vector<Parameter> variables,std::vector<std::string> lines, std::vector<CodeBlock> codeBlocks)
             : statement(statement),variables(variables), lines(lines),codeBlocks(codeBlocks) {}
 
+            CodeBlock(std::vector<std::string> lines)
+            : lines(lines) {}
     void incrementCurrentBlock() {
         currentBlock += 1;
     }

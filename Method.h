@@ -21,21 +21,35 @@ private:
     CodeBlock body;
 
 public:
+    Method() {
+        returnType = "";
+        methodName = "";
+        vector<string> temp = {""};
+        body = CodeBlock(temp);
+    }
     Method(string returnType, string methodName, vector<Parameter> parameters,CodeBlock body)
     : returnType(returnType),methodName(methodName),parameters(parameters), body(body) {}
 
-    string pointerForm(string className) {
+    Method(string returnType, string methodName,CodeBlock body)
+            : returnType(returnType),methodName(methodName), body(body) {}
+
+    string getFunctionName(string className) {
+        return className + "__" + methodName;
+    }
+    string getName() {
+        return methodName;
+    }
+
+    string pointerForm(string className){
         stringstream out;
 
         out << returnType << " (*" << methodName << ")(";
+        out << "struct *" << className;
+        if (!parameters.empty())
+            out << ", ";
         for (size_t i = 0; i < parameters.size(); i++) {
             string param = parameters.at(i).getType();
-            if (param.find(className) < param.size()) {
-                out << "struct " << param;
-            }
-            else {
-                out << param;
-            }
+            out << param;
             if (i < parameters.size()-1)
                 out << ", ";
         }

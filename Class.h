@@ -20,9 +20,9 @@ private:
     string className;
     vector<Parameter> members;
     vector<Method> methods;
-    //Method constructor;
-    //Method constructorPointer;
-    //Method deconstructor;
+    Method defaultConstructor;
+    Method pointerConstructor;
+    Method deconstructor;
 
     string makeStruct() {
         stringstream out;
@@ -39,23 +39,92 @@ private:
             out << method.pointerForm(className) << endl;
         }
         out << "} " << className << ";" << endl;
+
+        return out.str();
     }
+
+    Method createDefaultConstructor() {
+        vector<Parameter> memberNeedInit;
+        for (size_t i = 0; i < members.size(); i++) {
+            if (members.at(i).getStoredValue() != "") {
+                memberNeedInit.push_back(members.at(i));
+                members.at(i).setStoredValue("");
+            }
+        }
+        vector<string> codeBlock;
+        codeBlock.push_back(className + " newObject;");
+        for (auto member : memberNeedInit) {
+            codeBlock.push_back(className + "." + member.printWOType() + ";");
+        }
+
+        for (auto method : methods) {
+            codeBlock.push_back(className + "." + method.getName() + " = " + method.getFunctionName(className) + ";\n");
+        }
+        codeBlock.push_back("return newObject;");
+
+        return Method(className,className + "Default",CodeBlock(codeBlock));
+    }
+
+    Method createPointerConstructor() {
+        vector<Parameter> memberNeedInit;
+        for (size_t i = 0; i < members.size(); i++) {
+            if (members.at(i).getStoredValue() != "") {
+                memberNeedInit.push_back(members.at(i));
+                members.at(i).setStoredValue("");
+            }
+        }
+        vector<string> codeBlock;
+        codeBlock.push_back(className + " newObject;");
+        codeBlock.push_back("newObject = malloc(sizeof(" + className + "))");
+        for (auto member : memberNeedInit) {
+            codeBlock.push_back(className + "->" + member.printWOType() + ";");
+        }
+
+        for (auto method : methods) {
+            codeBlock.push_back(className + "->" + method.getName() + " = " + method.getFunctionName(className) + ";\n");
+        }
+        codeBlock.push_back("return newObject;");
+
+        return Method(className + "*",className + "Pointer",CodeBlock(codeBlock));
+    }
+
+    Method createDeconstructor() {
+        vector<Parameter> param;
+
+        param.push_back(Parameter(className,"*","object"));
+        vector<string> codeBlock;
+        codeBlock.push_back("free(object);");
+        codeBlock.push_back("return NULL;");
+
+        return Method("NULL",className + "Deconstructor",param,CodeBlock(codeBlock));
+    }
+
 public:
     Class();
-    Class(const string &className, const vector<Parameter> &members, vector<Method> methods)
-    : className(className), members(members), methods(methods) {};
+    /*Class(const string &className, const vector<Parameter> &members, vector<Method> methods)
+    : className(className), members(members), methods(methods) {};*/
+    Class(const string &className, vector<Parameter> members, vector<Method> methods) {
+        this->className = className;
+        this->members = members;
+        this->methods = methods;
+        this->defaultConstructor = createDefaultConstructor();
+        this->pointerConstructor = createPointerConstructor();
+        this->deconstructor = createDeconstructor();
+    }
 
     string makeSource() {
         stringstream out;
         out << "#include \"" << className << ".h\"" << endl << endl;
 
-        /*out << constructor.functionForm() << endl << endl;
-        out << constructorPointer.functionForm() << endl << endl;
-        out << deconstructor.functionForm() << endl << endl;*/
+        out << defaultConstructor.functionForm(className) << endl << endl;
+        out << pointerConstructor.functionForm(className) << endl << endl;
+        out << deconstructor.functionForm(className) << endl << endl;
 
-        /*for (auto method : methods) {
-            out << method.functionForm() << endl << endl;
-        }*/
+        for (auto method : methods) {
+            out << method.functionForm(className) << endl << endl;
+        }
+
+        return out.str();
     }
 
     string makeHeader() {
@@ -63,13 +132,14 @@ public:
 
         out << makeStruct() << endl << endl;
 
-        /*out << constructor.definitionForm() << endl << endl;
-        out << constructorPointer.definitionForm() << endl << endl;
-        out << deconstructor.definitionForm() << endl << endl;*/
+        out << defaultConstructor.definitionForm(className) << endl << endl;
+        out << pointerConstructor.definitionForm(className) << endl << endl;
+        out << deconstructor.definitionForm(className) << endl << endl;
 
+        return out.str();
     }
 
-    string toString() const{
+    string toString(){
         stringstream out;
 
         out << "class " << className << " {" << endl;
@@ -77,6 +147,10 @@ public:
             out << member << ";" << endl;
         }
         out << endl;
+        out << defaultConstructor.functionForm(className) << endl;
+        out << pointerConstructor.functionForm(className) << endl;
+        out << deconstructor.functionForm(className) << endl;
+
         for (auto method : methods) {
             out << method.functionForm(className) << endl;
         }
@@ -85,7 +159,7 @@ public:
         return out.str();
     }
 
-    friend std::ostream& operator<<(std::ostream& os, const Class& clasS)
+    friend std::ostream& operator<<(std::ostream& os, Class& clasS)
     {
         os << clasS.toString();
         return os;

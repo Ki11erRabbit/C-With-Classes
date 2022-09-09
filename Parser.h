@@ -1125,7 +1125,7 @@ public:
             i++;
         }
 
-        for (auto include : includes) {
+        /*for (auto include : includes) {
             cout << include << endl;
         }
         for (auto define : macros) {
@@ -1146,7 +1146,11 @@ public:
 
         for (size_t i = 0; i < tokens.size(); i++) {
             cout << tokens.at(i) << endl;
-        }
+        }*/
+
+        cout << classes.at(0).makeHeader() << endl << endl;
+
+        cout <<classes.at(0).makeSource();
 
     }
 
