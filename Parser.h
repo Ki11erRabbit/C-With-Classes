@@ -814,7 +814,7 @@ private:
         if (tokenType() == BRACE) {
             match(BRACE);
 
-            while (tokenType() != BRACE && subTokenType() != CLOSE) {//makes sure all variables outside of codeblocks are declared
+            do {//makes sure all variables outside of codeblocks are declared
                 if (tokenType() == KEYWORD && subTokenType() == TYPE) {
                     if (peek() == "enum") {
                         enums.push_back(enumM());
@@ -869,7 +869,7 @@ private:
                 if (tokens.empty()) {
                     break;
                 }
-            }
+            } while ((tokenType() != BRACE && subTokenType() != CLOSE));
             match(BRACE);
             return CodeBlock(statement, variables, enums, lines, codeBlocks);
         }

@@ -35,9 +35,9 @@ private:
                 out << "\t" << member << ";" << endl;
             }
         }
-        /*for (auto method : methods) {
-            out << method.pointerForm() << endl;
-        }*/
+        for (auto method : methods) {
+            out << method.pointerForm(className) << endl;
+        }
         out << "} " << className << ";" << endl;
     }
 public:

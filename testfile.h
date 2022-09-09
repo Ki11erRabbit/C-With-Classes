@@ -49,7 +49,10 @@ class test {
      * multiline comment
      */
     void setData(int data) {
-        this->data = data;
+        {
+            this->data = data;
+        }
+
     }
 
 
