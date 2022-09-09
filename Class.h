@@ -10,6 +10,7 @@
 #include <iostream>
 
 #include "Parameter.h"
+#include "Method.h"
 //#include "Method.h"
 
 using namespace std;
@@ -18,10 +19,10 @@ class Class {
 private:
     string className;
     vector<Parameter> members;
-    /*vector<Method> methods;
-    Method constructor;
-    Method constructorPointer;
-    Method deconstructor;*/
+    vector<Method> methods;
+    //Method constructor;
+    //Method constructorPointer;
+    //Method deconstructor;
 
     string makeStruct() {
         stringstream out;
@@ -40,8 +41,9 @@ private:
         out << "} " << className << ";" << endl;
     }
 public:
-    Class(const string &className, const vector<Parameter> &members)
-    : className(className), members(members) {};
+    Class();
+    Class(const string &className, const vector<Parameter> &members, vector<Method> methods)
+    : className(className), members(members), methods(methods) {};
 
     string makeSource() {
         stringstream out;
@@ -73,6 +75,10 @@ public:
         out << "class " << className << " {" << endl;
         for (auto member: members) {
             out << member << ";" << endl;
+        }
+        out << endl;
+        for (auto method : methods) {
+            out << method.functionForm(className) << endl;
         }
         out << "};" << endl;
 

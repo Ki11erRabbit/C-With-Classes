@@ -925,7 +925,7 @@ private:
                     lines.push_back("{}");
                     codeBlocks.push_back(codeBlock());
                 }
-                else {//statements and whatnot
+                else if (tokenType() != BRACE){//statements and whatnot
                     line = expression();
                     line += match(TERMINATOR);
                     lines.push_back(line);
@@ -1010,7 +1010,11 @@ private:
                     match(BRACE);
                     matchUntil(BRACE);
                     match(BRACE);*/
-                    classMethods = methodList();
+                    vector<Method> tempMethod = methodList();
+                    for (auto method : tempMethod) {
+                        classMethods.push_back(method);
+                    }
+
                 }
                 else {
                     if (tokenType() == COMMENT) {
@@ -1023,7 +1027,7 @@ private:
             }
             match(BRACE);
             match(TERMINATOR);
-            return Class(className, classMembers);
+            return Class(className, classMembers, classMethods);
         }
         else {
             throwError();

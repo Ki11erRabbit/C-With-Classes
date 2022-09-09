@@ -16,7 +16,7 @@
 using namespace std;
 class Method {
 private:
-    string returnType, methodName, className;
+    string returnType, methodName;
     vector<Parameter> parameters;
     CodeBlock body;
 
@@ -24,7 +24,7 @@ public:
     Method(string returnType, string methodName, vector<Parameter> parameters,CodeBlock body)
     : returnType(returnType),methodName(methodName),parameters(parameters), body(body) {}
 
-    string pointerForm() {
+    string pointerForm(string className) {
         stringstream out;
 
         out << returnType << " (*" << methodName << ")(";
@@ -44,10 +44,10 @@ public:
         return out.str();
     }
 
-    string functionForm() {
+    string functionForm(string className) {
         stringstream out;
 
-        out << returnType << className << "__" << methodName << "(";
+        out << returnType << " " << className << "__" << methodName << "(";
         for (size_t i = 0; i < parameters.size(); i++) {
             out << parameters.at(i).getType() << " " << parameters.at(i).getName();
             if (i < parameters.size()-1)
@@ -58,10 +58,10 @@ public:
         return out.str();
     }
 
-    string definitionForm() {
+    string definitionForm(string className) {
         stringstream out;
 
-        out << returnType << className << "__" << methodName << "(";
+        out << returnType << " " <<className << "__" << methodName << "(";
         for (size_t i = 0; i < parameters.size(); i++) {
             out << parameters.at(i).getType() << " " << parameters.at(i).getName();
             if (i < parameters.size()-1)
