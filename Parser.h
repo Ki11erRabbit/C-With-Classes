@@ -846,14 +846,23 @@ private:
                         line = "";
                     }
                     else {// for conditionals
-                        lines.push_back(controlFlow());
-                        if (tokenType() == BRACE) {
+                        if (peek() == "do") {
+                            lines.push_back(match(KEYWORD));
                             lines.push_back("{}");
                             codeBlocks.push_back(codeBlock());
+                            lines.push_back(controlFlow());
                         }
-                        else {//not sure why commenting this out works but ok
-                            //lines.push_back(expression());
+                        else {
+                            lines.push_back(controlFlow());
+                            if (tokenType() == BRACE) {
+                                lines.push_back("{}");
+                                codeBlocks.push_back(codeBlock());
+                            }
+                            else {//not sure why commenting this out works but ok
+                                //lines.push_back(expression());
+                            }
                         }
+
                     }
                 }
                 else if (tokenType() == BRACE && subTokenType() == OPEN) {
