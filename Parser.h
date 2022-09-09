@@ -760,7 +760,7 @@ private:
                 if (tokenType() == KEYWORD || tokenType() == IDENTIFIER) {
                     vector<vector<Parameter>> vars = variableDeclarationList();
                     for (size_t i = 0; i < vars.size(); i++) {
-                        for (size_t j = 0; j < vars.at(i).size(); i++) {
+                        for (size_t j = 0; j < vars.at(i).size(); j++) {
                             statement += vars.at(i).at(j).toString();
                             if (i < vars.size()-1 && j < vars.at(i).size()-1) {
                                 statement += ",";
@@ -790,7 +790,7 @@ private:
                 statement += expression();
                 statement += match(SPECIALCHAR);
             }
-            else {//for while and if
+            else if (peek() == "while" || peek() == "if"){//for while and if
                 statement += match(KEYWORD);
                 statement += match(SPECIALCHAR);
                 statement += expression();
@@ -846,13 +846,13 @@ private:
                         line = "";
                     }
                     else {// for conditionals
-                        statement = controlFlow();
+                        lines.push_back(controlFlow());
                         if (tokenType() == BRACE) {
                             lines.push_back("{}");
                             codeBlocks.push_back(codeBlock());
                         }
-                        else {
-                            lines.push_back(expression());
+                        else {//not sure why commenting this out works but ok
+                            //lines.push_back(expression());
                         }
                     }
                 }

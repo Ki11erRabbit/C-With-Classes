@@ -146,6 +146,8 @@ private:
             }
             else if (input.find("else") == 0) {
                 return {4, {KEYWORD,CONTROL}};
+            }else if (input.find("switch") == 0) {
+                return {6, {KEYWORD,CONTROL}};
             }
             else if (input.find("while") == 0) {
                 return {5,{KEYWORD,CONTROL}};
@@ -195,9 +197,9 @@ private:
             }
             //My KEYWORDS
             else if (input.find("this") == 0) {
-                return {4, {KEYWORD,TYPE}};
+                return {4, {IDENTIFIER,TYPE}};
             }
-            else if (input.find("class") == 0) {//TODO: add next token as custom type
+            else if (input.find("class") == 0) {
                 return {5, {KEYWORD,TYPE}};
             }
             else if (input.find("new") == 0) {
