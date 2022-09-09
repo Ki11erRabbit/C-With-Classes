@@ -13,6 +13,7 @@
 #include "Class.h"
 #include "Struct.h"
 #include "Method.h"
+#include "Enum.h"
 
 #define headerFile pair<string,vector<string>>
 using namespace std;
@@ -253,81 +254,6 @@ private:
     }
 
 
-    /*string expression() {
-        string statement;
-        if (tokenType() == SPECIALCHAR && subTokenType() == OPEN) {
-            statement += match(SPECIALCHAR);
-            if (tokenType() == KEYWORD) {//typecast
-                statement += match(KEYWORD);
-                if (tokenType() == OPERATOR) //pointer
-                    statement += match(OPERATOR);
-                match(SPECIALCHAR);//CLOSE Paren
-                statement += expression();
-            }
-            else {//for additional statements
-                statement += expression();
-            }
-        }
-        else if (tokenType() == IDENTIFIER) {
-            statement += match(IDENTIFIER);
-        }
-        else if (tokenType() == CONSTANT) {
-            statement += match(CONSTANT);
-        }
-        else if (tokenType() == STRING) {
-            statement += match(STRING);
-        }
-        else if (tokenType() == OPERATOR) { // ++var or *var dereferense
-            if (peek() == "*" || peek() == "++" || peek() == "--") {
-                statement += match(OPERATOR);
-                if (peek() == "*") {
-                    statement += match(OPERATOR);
-                }
-            }
-        }
-        else if (tokenType() == KEYWORD && subTokenType() == RETURN) {
-            statement += match(KEYWORD);
-            statement += expression();
-        }
-        else if (tokenType() == KEYWORD && subTokenType() == CONTROL) {//goto
-            statement += match(KEYWORD);
-            statement += match(IDENTIFIER);
-        }
-        if (tokenType() == OPERATOR && (peek() == "++" || peek() == "--")) {
-            statement += match(OPERATOR);
-        }
-        // operator
-        if (tokenType() == OPERATOR) {
-            if (subTokenType() == ASSIGNMENT) {
-                statement += match(OPERATOR);
-                statement += expression();
-            }
-            if (subTokenType() == SIZEOF) {
-                statement += sizeOf();
-                statement += expression();
-            }
-            if (subTokenType() == ACCESSOR){
-                statement += match(OPERATOR);
-                statement += expression();
-            }
-            else if (!subTokenType() == COMMA){
-                statement += match(OPERATOR);
-            }
-        }
-        if (tokenType() == BRACE) {
-            statement += match(BRACE);
-            vector<string> tokenString = matchUntil(BRACE);
-            for (auto token : tokenString) {
-                statement += token;
-            }
-        }
-
-        if (subTokenType() == CLOSE || subTokenType() == COMMA || tokenType() == TERMINATOR) {
-            return statement;
-        }
-        statement += expression();
-    }*/
-
     string expression() {
         string statement;
 
@@ -489,7 +415,7 @@ private:
         }
     }
 
-    vector<Parameter> variableDeclaration() {//TODO: make use expression()
+    vector<Parameter> variableDeclaration() {
         string varType,varName, pointer, contents;
         vector<Parameter> varList;
         if (tokenType() == KEYWORD) {
@@ -608,7 +534,7 @@ private:
 
     vector<vector<Parameter>> variableDeclarationList() {
         vector<vector<Parameter>> list;
-        if (tokenType() == KEYWORD) {
+        if (tokenType() == KEYWORD && subTokenType() == TYPE) {
             list.push_back(variableDeclaration());
             return variableDeclarationList(list);
         }
@@ -617,7 +543,7 @@ private:
         }
     }
     vector<vector<Parameter>> variableDeclarationList(vector<vector<Parameter>> list) {
-        if (tokenType() == KEYWORD) {
+        if (tokenType() == KEYWORD && subTokenType() == TYPE) {
             list.push_back(variableDeclaration());
             return variableDeclarationList(list);
         }
@@ -880,6 +806,7 @@ private:
     CodeBlock codeBlock() {
         vector<Parameter> variables;
         vector<CodeBlock> codeBlocks;
+        vector<Enum> enums;
         vector<string> lines;
         string line;
         string statement;
@@ -889,17 +816,25 @@ private:
 
             while (tokenType() != BRACE && subTokenType() != CLOSE) {//makes sure all variables outside of codeblocks are declared
                 if (tokenType() == KEYWORD && subTokenType() == TYPE) {
+                    if (peek() == "enum") {
+                        enums.push_back(enumM());
+                    }
                     vector<vector<Parameter>> temp = variableDeclarationList();
                     for (auto list : temp) {
                         for (auto param : list) {
                             variables.push_back(param);
                         }
                     }
-                    match(TERMINATOR);
+                    if (enums.empty()){
+                        match(TERMINATOR);
+                    }
                 }
                 if (tokenType() == KEYWORD && subTokenType() == CONTROL) {
                     if (peek() == "case" || peek() == "default") {//for within switch statements
                         line += match(KEYWORD);
+                        if (tokenType() == CONSTANT) {
+                            line += " " + match(CONSTANT);
+                        }
                         line += match(OPERATOR);
                         lines.push_back(line);
                         line = "";
@@ -936,7 +871,7 @@ private:
                 }
             }
             match(BRACE);
-            return CodeBlock(statement, variables, lines, codeBlocks);
+            return CodeBlock(statement, variables, enums, lines, codeBlocks);
         }
         else {
             throwError();
@@ -1057,6 +992,72 @@ private:
         }
     }
 
+    void updateType(string constant, TokenType type1, SubTokenType type2) {
+        for (size_t i = 0; i < tokens.size(); i++) {
+            if (this->tokens.at(i).getType() == IDENTIFIER) {
+                if (this->tokens.at(i).getValue() == constant) {
+                    this->tokens.at(i).setType(type1);
+                    this->tokens.at(i).setSubType(type2);
+                }
+            }
+        }
+    }
+
+    Enum enumM() {
+        string name;
+        string variable;
+        vector<Parameter> enumVals;
+        if (tokenType() == KEYWORD && peek() == "enum") {
+            match(KEYWORD);
+            name = match(IDENTIFIER);
+            updateType(name);
+            match(BRACE);
+            while (tokenType() != BRACE) {
+                string enumValName, enumValue;
+
+                enumValName = match(IDENTIFIER);
+                updateType(enumValName,CONSTANT,NONE);
+                if (tokenType() == OPERATOR && subTokenType() == ASSIGNMENT) {
+                    match(OPERATOR);
+                    enumValue = match(CONSTANT);
+                }
+                enumVals.push_back(Parameter("","",enumValName,enumValue));
+                if (tokenType() == OPERATOR) {
+                    match(OPERATOR);
+                }
+            }
+            match(BRACE);
+            if (tokenType() == IDENTIFIER) {
+                variable = match(IDENTIFIER);
+            }
+            match(TERMINATOR);
+            return Enum(name,enumVals,variable);
+        }
+        else {
+            throwError();
+        }
+    }
+    vector<Enum> enumList() {
+        vector<Enum> list;
+        if (tokenType() == KEYWORD && peek() == "enum") {
+            list.push_back(enumM());
+            return enumList(list);
+        }
+        else {
+            return list;
+        }
+    }
+    vector<Enum> enumList(vector<Enum> list) {
+        if (tokenType() == KEYWORD && peek() == "enum") {
+            list.push_back(enumM());
+            return enumList(list);
+        }
+        else {
+            return list;
+        }
+    }
+
+
 
 public:
 
@@ -1067,6 +1068,7 @@ public:
         vector<string> includes;
         vector<string> macros;
         vector<string> typeDefs;
+        vector<Enum> enums;
         vector<Struct> structs;
         vector<Class> classes;
         int i = 0;
@@ -1098,6 +1100,12 @@ public:
                         structs.push_back(strucT);
                     }
                 }
+                if (peek() == "enum") {
+                    vector<Enum> tempEnums = enumList();
+                    for (auto enuM : tempEnums) {
+                        enums.push_back(enuM);
+                    }
+                }
                 if (peek() == "class") {
                     vector<Class> tempClasses = classList();
                     for (auto clasS : tempClasses) {
@@ -1119,6 +1127,9 @@ public:
         }
         for (auto strucT : structs) {
             cout << strucT << endl;
+        }
+        for (auto enuM : enums) {
+            cout << enuM << endl;
         }
         for (auto clasS : classes) {
             cout << clasS << endl;

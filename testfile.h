@@ -14,6 +14,7 @@
             printf("Aqsa ");\
             a++;\
             }
+
 typedef struct temp {
     int x,z;
     int y;
@@ -40,6 +41,7 @@ class test {
 
     //returns data
     int getData() {
+        enum week{Mon, Tue, Wed, Thur, Fri, Sat, Sun}date;
         return data;
     }
 

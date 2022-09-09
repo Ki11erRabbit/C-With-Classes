@@ -26,6 +26,7 @@ public:
     Parameter (std::string type, std::string pointer, std::string name, std::string storedValue)
             : type(type), pointer(pointer), name(name), storedValue(storedValue) {};
 
+
     std::string getType() {
         return type;
     }

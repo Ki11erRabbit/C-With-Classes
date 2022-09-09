@@ -11,6 +11,7 @@
 #include <vector>
 
 #include "Parameter.h"
+#include "Enum.h"
 
 class CodeBlock {
 private:
@@ -18,12 +19,16 @@ private:
     std::vector<CodeBlock> codeBlocks;
     std::vector<std::string> lines;// code blocks get injected in order of discovery
     std::vector<Parameter> variables;
+    std::vector<Enum> enums;
     size_t currentBlock = 0;
 
 public:
 
-    CodeBlock(std::string statement, std::vector<Parameter> variables, std::vector<std::string> lines, std::vector<CodeBlock> codeBlocks)
-    : statement(statement),variables(variables),lines(lines),codeBlocks(codeBlocks) {}
+    CodeBlock(std::string statement, std::vector<Parameter> variables, std::vector<Enum> enums, std::vector<std::string> lines, std::vector<CodeBlock> codeBlocks)
+    : statement(statement),variables(variables),enums(enums), lines(lines),codeBlocks(codeBlocks) {}
+
+    CodeBlock(std::string statement, std::vector<Parameter> variables,std::vector<std::string> lines, std::vector<CodeBlock> codeBlocks)
+            : statement(statement),variables(variables), lines(lines),codeBlocks(codeBlocks) {}
 
     void incrementCurrentBlock() {
         currentBlock += 1;
@@ -36,6 +41,9 @@ public:
         out << "{" << std::endl;
         for (auto var : variables) {
             out << var << ";" << std::endl;
+        }
+        for (auto enuM : enums) {
+            out << enuM << endl;
         }
         for (auto line : lines) {
             if ( line == "{}") {
