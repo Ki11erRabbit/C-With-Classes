@@ -14,6 +14,7 @@
 #include "Struct.h"
 #include "Method.h"
 #include "Enum.h"
+#include "Function.h"
 
 #define headerFile pair<string,vector<string>>
 using namespace std;
@@ -693,6 +694,24 @@ private:
             false;
         }
     }
+    bool isFunction() {
+        size_t i = 0;
+        while (tokens.at(i).getSubType() == TYPE) {
+            i++;
+        }
+        if (tokens.at(i).getType() == OPERATOR) {//pointer
+            i++;
+        }
+        if (tokens.at(i).getType() == IDENTIFIER) {
+            if (tokens.at(i+1).getType() == SPECIALCHAR)
+                return true;
+            else
+                return false;
+        }
+        else {
+            false;
+        }
+    }
 
     Parameter methodParameter() {
         string parameterType, parameterName, parameterPointer;
@@ -932,6 +951,46 @@ private:
         }
     }
 
+    Function function() {
+        string returnType, functionName;
+        vector<Parameter> parameters;
+        if (tokenType() == KEYWORD) {
+            returnType = type();
+            functionName = match(IDENTIFIER);
+            match(SPECIALCHAR);
+
+            parameters = methodParameterList();
+
+            match(SPECIALCHAR);
+            CodeBlock body = codeBlock();
+
+            return Function(returnType, functionName, parameters, body);
+        }
+        else {
+            throwError();
+        }
+    }
+
+    vector<Function> functionList() {
+        vector<Function> list;
+        if (tokenType() == KEYWORD) {
+            list.push_back(function());
+            return functionList(list);
+        }
+        else {
+            return list;
+        }
+    }
+    vector<Function> functionList(vector<Function> list) {
+        if (tokenType() == KEYWORD) {
+            list.push_back(function());
+            return functionList(list);
+        }
+        else {
+            return list;
+        }
+    }
+
     Class classM() {
         string className;
         vector<Parameter> classMembers;
@@ -1083,6 +1142,7 @@ public:
         vector<string> typeDefs;
         vector<Enum> enums;
         vector<Struct> structs;
+        vector<Function> functions;
         vector<Class> classes;
         int i = 0;
         while (!tokens.empty()) {
@@ -1123,6 +1183,12 @@ public:
                     vector<Class> tempClasses = classList();
                     for (auto clasS : tempClasses) {
                         classes.push_back(clasS);
+                    }
+                }
+                if (isFunction()) {
+                    vector<Function> tempFunctions = functionList();
+                    for (auto function : tempFunctions) {
+                        functions.push_back(function);
                     }
                 }
             }
