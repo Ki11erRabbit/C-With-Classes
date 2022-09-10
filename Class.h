@@ -113,9 +113,13 @@ public:
         this->deconstructor = createDeconstructor();
     }
 
+    const string &getClassName() const {
+        return className;
+    }
+
     string makeSource() {
         stringstream out;
-        out << "#include \"" << className << ".h\"" << endl << endl;
+        //out << "#include \"" << className << ".h\"" << endl << endl;
 
         out << defaultConstructor.functionFormPlain("") << endl << endl;
         out << pointerConstructor.functionFormPlain("") << endl << endl;
@@ -130,12 +134,7 @@ public:
 
     string makeHeader() {
         stringstream out;
-        string classNameUpper;
-        for (size_t i = 0; i < className.length(); i++) {
-            classNameUpper.push_back(toupper(className[i]));
-        }
-        out << "#ifndef " << classNameUpper << endl;
-        out << "#define " << classNameUpper << endl;
+
         out << makeStruct() << endl << endl;
 
         out << defaultConstructor.definitionFormPlain(className) << endl << endl;
@@ -145,7 +144,6 @@ public:
         for (auto method : methods) {
             out << method.definitionForm(className) << endl;
         }
-        out << "#endif" << endl;
 
         return out.str();
     }

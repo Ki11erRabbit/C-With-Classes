@@ -15,6 +15,7 @@
 #include "Method.h"
 #include "Enum.h"
 #include "Function.h"
+#include "CwithClasses.h"
 
 #define headerFile pair<string,vector<string>>
 using namespace std;
@@ -1138,7 +1139,7 @@ public:
     Parser (vector<Token> tokens)
     : tokens(tokens) {}
 
-    void startParsing() {
+    CwithClasses startParsing() {
         vector<string> includes;
         vector<string> macros;
         vector<string> typeDefs;
@@ -1146,7 +1147,6 @@ public:
         vector<Struct> structs;
         vector<Function> functions;
         vector<Class> classes;
-        int i = 0;
         while (!tokens.empty()) {
             if (tokenType() == PREPROC) {
                 if (peek() == "#include") {
@@ -1194,7 +1194,6 @@ public:
                     }
                 }
             }
-            i++;
         }
 
         /*for (auto include : includes) {
@@ -1220,10 +1219,10 @@ public:
             cout << tokens.at(i) << endl;
         }*/
 
-        cout << classes.at(0).makeHeader() << endl << endl;
+        //cout << classes.at(0).makeHeader() << endl << endl;
 
-        cout <<classes.at(0).makeSource();
-
+        //cout <<classes.at(0).makeSource();
+        return CwithClasses(includes,macros,typeDefs,enums,structs,functions,classes);
     }
 
 };

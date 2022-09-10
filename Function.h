@@ -54,7 +54,7 @@ public:
 
         return out.str();
     }
-    string functionFormPlain(string className) {
+    string functionFormPlain() {
         stringstream out;
 
         out << returnType << " " << functionName << "(";
@@ -68,7 +68,7 @@ public:
         return out.str();
     }
 
-    string functionForm(string className) {
+    string functionForm() {
         stringstream out;
 
         out << returnType << " " << functionName << "(";
@@ -82,7 +82,7 @@ public:
         return out.str();
     }
 
-    string definitionForm(string className) {
+    string definitionForm() {
         stringstream out;
 
         out << returnType << " " << functionName << "(";
@@ -95,7 +95,7 @@ public:
 
         return out.str();
     }
-    string definitionFormPlain(string className) {
+    string definitionFormPlain() {
         stringstream out;
 
         out << returnType << " " << functionName << "(";
