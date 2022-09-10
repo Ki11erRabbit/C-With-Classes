@@ -695,6 +695,8 @@ private:
         }
     }
     bool isFunction() {
+        if (tokens.empty())
+            return false;
         size_t i = 0;
         while (tokens.at(i).getSubType() == TYPE) {
             i++;
@@ -954,7 +956,7 @@ private:
     Function function() {
         string returnType, functionName;
         vector<Parameter> parameters;
-        if (tokenType() == KEYWORD) {
+        if (tokenType() == KEYWORD && isFunction()) {
             returnType = type();
             functionName = match(IDENTIFIER);
             match(SPECIALCHAR);
@@ -973,7 +975,7 @@ private:
 
     vector<Function> functionList() {
         vector<Function> list;
-        if (tokenType() == KEYWORD) {
+        if (tokenType() == KEYWORD && isFunction()) {
             list.push_back(function());
             return functionList(list);
         }
@@ -982,7 +984,7 @@ private:
         }
     }
     vector<Function> functionList(vector<Function> list) {
-        if (tokenType() == KEYWORD) {
+        if (tokenType() == KEYWORD && isFunction()) {
             list.push_back(function());
             return functionList(list);
         }

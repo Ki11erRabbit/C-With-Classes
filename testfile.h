@@ -34,6 +34,20 @@ struct bob {
     int x,z;
     int y;
 };
+
+void setData(int *data) {
+
+    do
+    {
+        case 0:
+            break;
+        default:
+            this->data = data;
+        break;
+    } while (0);
+    this->data = data;
+}
+
 class test {
     int data = add(2,2,"hello");
     Temp *hold;
