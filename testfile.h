@@ -48,7 +48,7 @@ class test {
     /*
      * multiline comment
      */
-    void setData(int data) {
+    void setData(int *data) {
 
         do
         {

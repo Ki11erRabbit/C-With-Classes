@@ -695,12 +695,16 @@ private:
     }
 
     Parameter methodParameter() {
-        string parameterType, parameterName;
+        string parameterType, parameterName, parameterPointer;
         if (tokenType() == KEYWORD) {
             parameterType = type();
 
+            if (tokenType() == OPERATOR) {
+                parameterPointer = match(OPERATOR);
+            }
+
             parameterName = match(IDENTIFIER);
-            return Parameter(parameterType, parameterName);
+            return Parameter(parameterType, parameterPointer,parameterName);
         }
         else if (tokenType() == OPERATOR && subTokenType() == TYPE) {//for variable length arguments
             parameterName = match(OPERATOR);
@@ -717,16 +721,16 @@ private:
         vector<Parameter> list;
         if (tokenType() == KEYWORD) {
             list.push_back(methodParameter());
-            return methodParameterList();
+            return methodParameterList(list);
         }
         else if (tokenType() == OPERATOR && subTokenType() == COMMA) {// for commas
             match(OPERATOR);
             list.push_back(methodParameter());
-            return methodParameterList();
+            return methodParameterList(list);
         }
         else if (tokenType() == OPERATOR && subTokenType() == TYPE) {//for variable length functions
             list.push_back(methodParameter());
-            return methodParameterList();
+            return methodParameterList(list);
         }
         else {
             return list;
@@ -735,16 +739,16 @@ private:
     vector<Parameter> methodParameterList(vector<Parameter> list) {
         if (tokenType() == KEYWORD) {
             list.push_back(methodParameter());
-            return methodParameterList();
+            return methodParameterList(list);
         }
         else if (tokenType() == OPERATOR && subTokenType() == COMMA) {// for commas
             match(OPERATOR);
             list.push_back(methodParameter());
-            return methodParameterList();
+            return methodParameterList(list);
         }
         else if (tokenType() == OPERATOR && subTokenType() == TYPE) {//for variable length functions
             list.push_back(methodParameter());
-            return methodParameterList();
+            return methodParameterList(list);
         }
         else {
             return list;

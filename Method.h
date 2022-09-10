@@ -44,16 +44,29 @@ public:
         stringstream out;
 
         out << returnType << " (*" << methodName << ")(";
-        out << "struct *" << className;
+        out << "struct " << className << "*";
         if (!parameters.empty())
             out << ", ";
         for (size_t i = 0; i < parameters.size(); i++) {
-            string param = parameters.at(i).getType();
+            string param = parameters.at(i).getType() + parameters.at(i).getPointer();
             out << param;
             if (i < parameters.size()-1)
                 out << ", ";
         }
         out << ");";
+
+        return out.str();
+    }
+    string functionFormPlain(string className) {
+        stringstream out;
+
+        out << returnType << " " << className << "__" << methodName << "(";
+        for (size_t i = 0; i < parameters.size(); i++) {
+            out << parameters.at(i).getType() << " " << parameters.at(i).getPointer()  << parameters.at(i).getName();
+            if (i < parameters.size()-1)
+                out << ", ";
+        }
+        out << ") " << body;
 
         return out.str();
     }
@@ -66,7 +79,7 @@ public:
         if (!parameters.empty())
             out << ", ";
         for (size_t i = 0; i < parameters.size(); i++) {
-            out << parameters.at(i).getType() << " " << parameters.at(i).getName();
+            out << parameters.at(i).getType() << " " << parameters.at(i).getPointer()  << parameters.at(i).getName();
             if (i < parameters.size()-1)
                 out << ", ";
         }
@@ -83,7 +96,21 @@ public:
         if (!parameters.empty())
             out << ", ";
         for (size_t i = 0; i < parameters.size(); i++) {
-            out << parameters.at(i).getType() << " " << parameters.at(i).getName();
+            out << parameters.at(i).getType() << " " << parameters.at(i).getPointer()  << parameters.at(i).getName();
+            if (i < parameters.size()-1)
+                out << ", ";
+        }
+        out << ")";
+
+        return out.str();
+    }
+    string definitionFormPlain(string className) {
+        stringstream out;
+
+        out << returnType << " " << className << "__" << methodName << "(";
+
+        for (size_t i = 0; i < parameters.size(); i++) {
+            out << parameters.at(i).getType() << " " << parameters.at(i).getPointer() << parameters.at(i).getName();
             if (i < parameters.size()-1)
                 out << ", ";
         }

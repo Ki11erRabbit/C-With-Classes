@@ -8,6 +8,7 @@
 #include <string>
 #include <vector>
 #include <iostream>
+#include <locale>
 
 #include "Parameter.h"
 #include "Method.h"
@@ -58,7 +59,7 @@ private:
         }
 
         for (auto method : methods) {
-            codeBlock.push_back(className + "." + method.getName() + " = " + method.getFunctionName(className) + ";\n");
+            codeBlock.push_back(className + "." + method.getName() + " = " + method.getFunctionName(className) + ";");
         }
         codeBlock.push_back("return newObject;");
 
@@ -81,7 +82,7 @@ private:
         }
 
         for (auto method : methods) {
-            codeBlock.push_back(className + "->" + method.getName() + " = " + method.getFunctionName(className) + ";\n");
+            codeBlock.push_back(className + "->" + method.getName() + " = " + method.getFunctionName(className) + ";");
         }
         codeBlock.push_back("return newObject;");
 
@@ -116,9 +117,9 @@ public:
         stringstream out;
         out << "#include \"" << className << ".h\"" << endl << endl;
 
-        out << defaultConstructor.functionForm(className) << endl << endl;
-        out << pointerConstructor.functionForm(className) << endl << endl;
-        out << deconstructor.functionForm(className) << endl << endl;
+        out << defaultConstructor.functionFormPlain("") << endl << endl;
+        out << pointerConstructor.functionFormPlain("") << endl << endl;
+        out << deconstructor.functionFormPlain(className) << endl << endl;
 
         for (auto method : methods) {
             out << method.functionForm(className) << endl << endl;
@@ -129,12 +130,22 @@ public:
 
     string makeHeader() {
         stringstream out;
-
+        string classNameUpper;
+        for (size_t i = 0; i < className.length(); i++) {
+            classNameUpper.push_back(toupper(className[i]));
+        }
+        out << "#ifndef " << classNameUpper << endl;
+        out << "#define " << classNameUpper << endl;
         out << makeStruct() << endl << endl;
 
-        out << defaultConstructor.definitionForm(className) << endl << endl;
-        out << pointerConstructor.definitionForm(className) << endl << endl;
-        out << deconstructor.definitionForm(className) << endl << endl;
+        out << defaultConstructor.definitionFormPlain(className) << endl << endl;
+        out << pointerConstructor.definitionFormPlain(className) << endl << endl;
+        out << deconstructor.definitionFormPlain(className) << endl << endl;
+
+        for (auto method : methods) {
+            out << method.definitionForm(className) << endl;
+        }
+        out << "#endif" << endl;
 
         return out.str();
     }

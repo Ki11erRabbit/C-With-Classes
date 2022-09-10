@@ -36,6 +36,9 @@ public:
     std::string getStoredValue() {
         return storedValue;
     }
+    std::string getPointer() {
+        return pointer;
+    }
     void setStoredValue(std::string value) {
         storedValue = value;
     }
