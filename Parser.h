@@ -1001,6 +1001,7 @@ private:
         if (tokenType() == KEYWORD && peek() == "class") {
             match(KEYWORD);
             className = match(IDENTIFIER);
+            updateType(className);
             match(BRACE);
             while (tokenType() != BRACE && nextTokenType() != TERMINATOR) {
                 if (isMember()) {//for class members

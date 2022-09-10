@@ -76,7 +76,7 @@ private:
         }
         vector<string> codeBlock;
         codeBlock.push_back(className + " newObject;");
-        codeBlock.push_back("newObject = malloc(sizeof(" + className + "))");
+        codeBlock.push_back("newObject = malloc(sizeof(" + className + "));");
         for (auto member : memberNeedInit) {
             codeBlock.push_back(className + "->" + member.printWOType() + ";");
         }
