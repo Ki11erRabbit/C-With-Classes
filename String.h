@@ -571,7 +571,29 @@ class String {
     }
 
     const char* c_str() {
-        return strdup(this->str);
+        if (this->str[this->size-1] == '\0') {
+            return strdup(this->str);
+        }
+        else {
+            char *strWTerm = (char*) malloc(this->size + 1);
+            for (size_t i = 0; i < this->size; i++) {
+                strWTerm[i] = this->str[i];
+            }
+            strWTerm[this->size] = '\0';
+            return strWTerm;
+        }
+    }
+    const char* data() {
+        if (this->str[this->size-1] == '\0') {
+            char *strWTerm = (char*) malloc(this->size - 1);
+            for (size_t i = 0; i < this->size; i++) {
+                strWTerm[i] = this->str[i];
+            }
+            return strWTerm;
+        }
+        else {
+            return strdup(this->str);
+        }
     }
     size_t copy(char* s, size_t len, size_t pos) {
         if (pos > this->size) {
