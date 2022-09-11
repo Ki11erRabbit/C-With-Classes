@@ -138,9 +138,30 @@ class String {
             this->maxSize = totalSize;
         }
         strcat(this->str,s);
+        this->size = strlen(this->str);
         return *this;
     }
-    //TODO: finish other append functions
+    String appendBuffer(char *buffer, size_t n) {
+        size_t totalSize = this->size + n;
+        if (totalSize > this->maxSize) {
+            this->str = (char*)realloc(this->str,totalSize);
+            this->maxSize = totalSize;
+        }
+        strncpy(this->str,buffer,n);
+        this->size = strlen(this->str);
+        return *this;
+    }
+    String appendFill(size_t n, char c) {
+        size_t totalSize = this->size + n;
+        if (totalSize > this->maxSize) {
+            this->str = (char*)realloc(this->str, totalSize);
+            this->maxSize = totalSize;
+        }
+        for (size_t i = this->size; this->maxSize - i < n; i++) {
+            this->str[i] = c;
+        }
+        return *this;
+    }
 
     void push_back(char c) {
         size_t totalSize = this->size + 1;
@@ -166,7 +187,19 @@ class String {
 
         return *this;
     }
-    //TODO: put in substring assign
+    String assignSubstring(String *str,size_t subpos, size_t sublen) {
+        if (sublen > str->length()) {
+            sublen = 0;
+        }
+        if (subpos > str->size) {
+            fprintf(stderr, "%s", "Error: out of bounds");
+            exit(1);
+        }
+        free(this->str);
+        strncpy(this->str,str->str+subpos,sublen);
+
+        return *this;
+    }
     String assignStr(char *str) {
         free(this->str);
         this->str = strdup(str);
@@ -175,8 +208,113 @@ class String {
 
         return *this;
     }
-    //TODO: put in buffer assign
+    String assignBuffer(char* buffer, size_t n) {
+        free(this->str);
+        strncpy(this->str,buffer,n);
+
+        return *this;
+    }
+    String assignFill(size_t n, char c) {
+        free(this->str);
+        char *newStr = (char*)malloc(sizeof(char) * n);
+        for (size_t i = 0; i < n; i++) {
+            newStr[i] = c;
+        }
+        this->str = newStr;
+
+        return *this;
+    }
+
     //TODO: do insert, replace
+    String insertString(size_t pos, String *str) {
+        if (pos > this->size) {
+            fprintf(stderr, "%s", "Error: out of bounds");
+            exit(1);
+        }
+        size_t totalSize = this->size + str->size;
+        if (totalSize > this->maxSize) {
+            this->str = (char*) realloc(this->str,totalSize);
+        }
+        char* tempStr = strdup(this->str+pos);
+        this->str[pos] = '\0';
+        strcat(this->str,str->str);
+        strcat(this->str,tempStr);
+        free(tempStr);
+
+        return *this;
+    }
+    String insertSubstring(size_t pos, String *str, size_t subpos, size_t sublen) {
+        if (pos > this->size) {
+            fprintf(stderr, "%s", "Error: out of bounds");
+            exit(1);
+        }
+        if (sublen > str->size) {
+            sublen = str->size;
+        }
+        size_t totalSize = this->size + str->size;
+        if (totalSize > this->maxSize) {
+            this->str = (char*) realloc(this->str,totalSize);
+        }
+        char* tempStr = strdup(this->str+pos);
+        this->str[pos] = '\0';
+        strncat(this->str,str->str+subpos,sublen);
+        strcat(this->str,tempStr);
+        free(tempStr);
+
+        return *this;
+    }
+    String insertStr(size_t pos, char *s) {
+        if (pos > this->size) {
+            fprintf(stderr, "%s", "Error: out of bounds");
+            exit(1);
+        }
+        size_t totalSize = this->size + strlen(s);
+        if (totalSize > this->maxSize) {
+            this->str = (char*) realloc(this->str,totalSize);
+        }
+        char* tempStr = strdup(this->str+pos);
+        this->str[pos] = '\0';
+        strcat(this->str,s);
+        strcat(this->str,tempStr);
+        free(tempStr);
+
+        return *this;
+    }
+    String insertStr(size_t pos, char *buffer, size_t n) {
+        if (pos > this->size) {
+            fprintf(stderr, "%s", "Error: out of bounds");
+            exit(1);
+        }
+        size_t totalSize = this->size + n;
+        if (totalSize > this->maxSize) {
+            this->str = (char*) realloc(this->str,totalSize);
+        }
+        char* tempStr = strdup(this->str+pos);
+        this->str[pos] = '\0';
+        strncat(this->str,buffer,n);
+        strcat(this->str,tempStr);
+        free(tempStr);
+
+        return *this;
+    }
+    String insertFill(size_t pos, char *s) {
+        if (pos > this->size) {
+            fprintf(stderr, "%s", "Error: out of bounds");
+            exit(1);
+        }
+        size_t totalSize = this->size + strlen(s);
+        if (totalSize > this->maxSize) {
+            this->str = (char*) realloc(this->str,totalSize);
+        }
+        char* tempStr = strdup(this->str+pos);
+        this->str[pos] = '\0';
+        strcat(this->str,s);
+        strcat(this->str,tempStr);
+        free(tempStr);
+
+        return *this;
+    }
+
     String erase(size_t pos) {
         if (pos > this->size) {
             fprintf(stderr, "%s", "Error: out of bounds");
