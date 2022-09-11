@@ -460,6 +460,7 @@ private:
                     //match(OPERATOR);
                 }
                 if (tokenType() == OPERATOR && subTokenType() == COMMA) {
+                    match(OPERATOR);
                     varList.push_back(Parameter(varType,pointer,varName,contents));
                     return variableDeclaration(varList, varType);
                 }
@@ -575,7 +576,7 @@ private:
     void updateType(string identifier) {
         for (size_t i = 0; i < tokens.size(); i++) {
             if (this->tokens.at(i).getType() == IDENTIFIER) {
-                if (this->tokens.at(i).getValue() == identifier) {
+                if (this->tokens.at(i).getValue() == identifier && this->tokens.at(i+1).getValue() != "(") {
                     this->tokens.at(i).setType(KEYWORD);
                     this->tokens.at(i).setSubType(TYPE);
                 }

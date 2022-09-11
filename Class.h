@@ -34,7 +34,7 @@ private:
                 out << "\t" << "struct " << member << ";" << endl;
             }
             else {
-                out << "\t" << member << ";" << endl;
+                out << "\t" << member.printWType() << ";" << endl;
             }
         }
         for (auto method : methods) {
@@ -103,29 +103,37 @@ private:
     }
 
     void findAndSetConstructors() {
+        bool dConstruct = false, pConstruct = false;
         for (size_t i = 0; i < methods.size(); i++) {
             if (methods.at(i).getName() == className) {
                 defaultConstructor = methods.at(i);
                 methods.erase(methods.begin()+i);
-                i--;
+                if (i > 0)
+                    i--;
                 injectVTable(defaultConstructor,0);
+                dConstruct = true;
             }
-            if (members.at(i).getName() == "new" + className) {
+            if (methods.at(i).getName() == "new" + className) {
                 pointerConstructor = methods.at(i);
                 methods.erase(methods.begin()+i);
-                i--;
+                if (i > 0)
+                    i--;
                 injectVTable(pointerConstructor,1);
+                pConstruct = true;
             }
         }
-        defaultConstructor = createDefaultConstructor();
-        pointerConstructor = createPointerConstructor();
+        if (!dConstruct)
+            defaultConstructor = createDefaultConstructor();
+
+        if (!pConstruct)
+            pointerConstructor = createPointerConstructor();
     }
 
-    void injectVTable(Method constructor, char key) {
+    void injectVTable(Method& constructor, char key) {
         CodeBlock oldBody = constructor.getBody();
         vector<Parameter> parameters = oldBody.getVariables();
         vector<string> lines = oldBody.getLines();
-        Parameter newObject;
+        Parameter newObject("temp","temp");
         for (auto var : parameters) {
             if (var.getType() == className) {
                 newObject = var;
@@ -140,13 +148,18 @@ private:
             }
             vector<string> codeBlock;
             string temp;
-            codeBlock.push_back(className + " newObject;");
+            codeBlock.push_back(className + newObject.getName() +";");
             for (auto member : memberNeedInit) {
-                lines.insert(lines.begin(),temp + newObject.getName() + "." + member.printWOType() + ";");
+                lines.insert(lines.begin(),temp + newObject.getName() + "." + member.printWOTypePointer() + ";");
             }
 
             for (auto method : methods) {
-                lines.insert(lines.end() - 1,temp +"newObject" + "." + method.getName() + " = " + method.getFunctionName(className) + ";");
+                if (method.getName() == "new" + className || method.getName() == "_new" + className || method.getName() == "_" + className) {
+                    continue;
+                }
+                else {
+                    lines.insert(lines.end() - 1,temp + newObject.getName() + "." + method.getName() + " = " + method.getFunctionName(className) + ";");
+                }
             }
 
             constructor.setBody(CodeBlock("",parameters,lines,oldBody.getCodeBlocks()));
@@ -162,30 +175,47 @@ private:
             string temp;
             codeBlock.push_back(className + " newObject;");
             for (auto member : memberNeedInit) {
-                lines.insert(lines.begin(),temp + newObject.getName() + "." + member.printWOType() + ";");
+                lines.insert(lines.begin(),temp + newObject.getName() + "->" + member.printWOTypePointer() + ";");
             }
 
             for (auto method : methods) {
-                lines.insert(lines.end() - 1,temp +"newObject" + "->" + method.getName() + " = " + method.getFunctionName(className) + ";");
+                if (method.getName() == "new" + className || method.getName() == "_new" + className || method.getName() == "_" + className) {
+                    continue;
+                }
+                else {
+                    lines.insert(lines.end() - 1, temp + newObject.getName() + "->" + method.getName() + " = " +
+                                                  method.getFunctionName(className) + ";");
+                }
             }
 
             constructor.setBody(CodeBlock("",parameters,lines,oldBody.getCodeBlocks()));
         }
+
     }
 
     void findAndSetDeconstructors() {
+        bool dDeconstruct = false, pDeconstruct = false;
         for (size_t i = 0; i < methods.size(); i++) {
             if (methods.at(i).getName() == "_" + className) {
                 deconstructor = methods.at(i);
                 methods.erase(methods.begin()+i);
-                i--;
+                if (i > 0)
+                    i--;
+                dDeconstruct = true;
             }
-            if (members.at(i).getName() == "_new" + className) {
+            if (methods.at(i).getName() == "_new" + className) {
                 pointerDeconstructor = methods.at(i);
                 methods.erase(methods.begin()+i);
-                i--;
+                if (i > 0)
+                    i--;
+                pDeconstruct = true;
             }
         }
+        if (!dDeconstruct)
+            deconstructor = createDeconstructor();
+
+        if (!pDeconstruct)
+            pointerDeconstructor = createDeconstructor();
     }
 public:
     Class();
@@ -196,7 +226,7 @@ public:
         this->members = members;
         this->methods = methods;
         findAndSetConstructors();
-        this->deconstructor = createDeconstructor();
+        findAndSetDeconstructors();
     }
 
     const string &getClassName() const {
@@ -207,9 +237,10 @@ public:
         stringstream out;
         //out << "#include \"" << className << ".h\"" << endl << endl;
 
-        out << defaultConstructor.functionFormPlain("") << endl << endl;
-        out << pointerConstructor.functionFormPlain("") << endl << endl;
+        out << defaultConstructor.functionFormPlain(className) << endl << endl;
+        out << pointerConstructor.functionFormPlain(className) << endl << endl;
         out << deconstructor.functionFormPlain(className) << endl << endl;
+        out << pointerDeconstructor.functionFormPlain(className) << endl << endl;
 
         for (auto method : methods) {
             out << method.functionForm(className) << endl << endl;
@@ -226,6 +257,7 @@ public:
         out << defaultConstructor.definitionFormPlain(className) << endl << endl;
         out << pointerConstructor.definitionFormPlain(className) << endl << endl;
         out << deconstructor.definitionFormPlain(className) << endl << endl;
+        out << pointerDeconstructor.definitionFormPlain(className) << endl << endl;
 
         for (auto method : methods) {
             out << method.definitionForm(className) << endl;

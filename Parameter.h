@@ -55,6 +55,24 @@ public:
 
         return out.str();
     }
+    std::string printWOTypePointer() const{
+        std::stringstream out;
+        out << name;
+        if (storedValue != "") {
+            out << " = " << storedValue;
+        }
+
+        return out.str();
+    }
+    std::string printWType() const{
+        std::stringstream out;
+        out << type << " ";
+        if (pointer != "" )
+            out << pointer;
+        out << name;
+
+        return out.str();
+    }
 
     std::string toString() const{
         std::stringstream out;
