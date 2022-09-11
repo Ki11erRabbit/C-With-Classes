@@ -231,7 +231,7 @@ class String {
     }
 
     const char* c_str() {
-        return strdup(this->str);
+        return this->str;
     }
     size_t copy(char* s, size_t len, size_t pos) {
         if (pos > this->size) {
