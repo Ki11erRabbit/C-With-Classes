@@ -13,14 +13,14 @@ class String {
     size_t size;
     size_t maxSize;
 
-    String String(char* str) {
+    String StringStr(char* str) {
         String newString;
         newString.str = strdup(str);
         newString.size = sizeof(str);
         newString.maxSize = sizeof(str);
         return newString;
     }
-    String* newString(char* str) {
+    String* newStringStr(char* str) {
         String *newString;
         newString->str = strdup(str);
         newString->size = sizeof(str);
@@ -200,7 +200,7 @@ class String {
         return *this;
     }
     String assignSubstring(String *str,size_t subpos, size_t sublen) {
-        if (sublen > str->length()) {
+        if (sublen > str->size) {
             sublen = 0;
         }
         if (subpos > str->size) {
@@ -297,7 +297,7 @@ class String {
 
         return *this;
     }
-    String insertStr(size_t pos, char *buffer, size_t n) {
+    String insertBuffer(size_t pos, char *buffer, size_t n) {
         if (pos > this->size) {
             fprintf(stderr, "%s", "Error: out of bounds");
             exit(1);
@@ -642,3 +642,14 @@ class String {
         return strcmp(this->str,s);
     }
 };
+
+size_t getline(FILE* in,String* str, char* delim) {
+    if (delim == NULL) {
+        ssize_t output = getline(&str->str,NULL,in);
+        return output;
+    }
+    else {
+        ssize_t output = getdelim(&str->str,NULL,*delim,in);
+        return output;
+    }
+}

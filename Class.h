@@ -23,6 +23,8 @@ private:
     vector<Method> methods;
     Method defaultConstructor;
     Method pointerConstructor;
+    vector<Method> altConstructors;
+    vector<Method> altPointerConstructors;
     Method deconstructor;
     Method pointerDeconstructor;
 
@@ -102,6 +104,7 @@ private:
         return Method("void",className + "Deconstructor",param,CodeBlock(codeBlock));
     }
 
+
     void findAndSetConstructors() {
         bool dConstruct = false, pConstruct = false;
         for (size_t i = 0; i < methods.size(); i++) {
@@ -113,6 +116,11 @@ private:
                 injectVTable(defaultConstructor,0);
                 dConstruct = true;
             }
+            else if (methods.at(i).getName().find(className) == 0) {
+                injectVTable(methods.at(i),0);
+                altConstructors.push_back(methods.at(i));
+                methods.erase(methods.begin()+i);
+            }
             if (methods.at(i).getName() == "new" + className) {
                 pointerConstructor = methods.at(i);
                 methods.erase(methods.begin()+i);
@@ -120,6 +128,11 @@ private:
                     i--;
                 injectVTable(pointerConstructor,1);
                 pConstruct = true;
+            }
+            else if (methods.at(i).getName().find("new" + className) == 0) {
+                injectVTable(methods.at(i),1);
+                altPointerConstructors.push_back(methods.at(i));
+                methods.erase(methods.begin()+i);
             }
         }
         if (!dConstruct)
@@ -148,7 +161,7 @@ private:
             }
             vector<string> codeBlock;
             string temp;
-            codeBlock.push_back(className + newObject.getName() +";");
+            codeBlock.push_back(className + " " + newObject.getName() +";");
             for (auto member : memberNeedInit) {
                 lines.insert(lines.begin(),temp + newObject.getName() + "." + member.printWOTypePointer() + ";");
             }
@@ -165,6 +178,11 @@ private:
             constructor.setBody(CodeBlock("",parameters,lines,oldBody.getCodeBlocks()));
         }
         if (key == 1) {
+            for (size_t i = 0; i < parameters.size(); i++) {
+                if (parameters.at(i).getType() == className) {
+                    parameters.at(i).setStoredValue("malloc(sizeof("+ className +"))");
+                }
+            }
             vector<Parameter> memberNeedInit;
             for (size_t i = 0; i < members.size(); i++) {
                 if (members.at(i).getStoredValue() != "") {
@@ -173,7 +191,7 @@ private:
             }
             vector<string> codeBlock;
             string temp;
-            codeBlock.push_back(className + " newObject;");
+            codeBlock.push_back(className + " " + newObject.getName() +";");
             for (auto member : memberNeedInit) {
                 lines.insert(lines.begin(),temp + newObject.getName() + "->" + member.printWOTypePointer() + ";");
             }
@@ -238,7 +256,14 @@ public:
         //out << "#include \"" << className << ".h\"" << endl << endl;
 
         out << defaultConstructor.functionFormPlain(className) << endl << endl;
+        for (auto altConstruct : altConstructors) {
+            out << altConstruct.functionFormPlain(className) << endl << endl;
+        }
         out << pointerConstructor.functionFormPlain(className) << endl << endl;
+        for (auto altPointConstruct : altPointerConstructors) {
+            out << altPointConstruct.functionFormPlain(className) << endl << endl;
+        }
+
         out << deconstructor.functionFormPlain(className) << endl << endl;
         out << pointerDeconstructor.functionFormPlain(className) << endl << endl;
 
@@ -255,7 +280,13 @@ public:
         out << makeStruct() << endl << endl;
 
         out << defaultConstructor.definitionFormPlain(className) << endl << endl;
+        for (auto altConstruct : altConstructors) {
+            out << altConstruct.definitionFormPlain(className) << endl << endl;
+        }
         out << pointerConstructor.definitionFormPlain(className) << endl << endl;
+        for (auto altPointConstruct : altPointerConstructors) {
+            out << altPointConstruct.definitionFormPlain(className) << endl << endl;
+        }
         out << deconstructor.definitionFormPlain(className) << endl << endl;
         out << pointerDeconstructor.definitionFormPlain(className) << endl << endl;
 

@@ -68,10 +68,10 @@ public:
         return out.str();
     }
 
-    string functionForm() {
+    string functionForm(string nameSpace) {
         stringstream out;
 
-        out << returnType << " " << functionName << "(";
+        out << returnType << " " << nameSpace << "_" <<functionName << "(";
         for (size_t i = 0; i < parameters.size(); i++) {
             out << parameters.at(i).getType() << " " << parameters.at(i).getPointer()  << parameters.at(i).getName();
             if (i < parameters.size()-1)
@@ -82,10 +82,10 @@ public:
         return out.str();
     }
 
-    string definitionForm() {
+    string definitionForm(string nameSpace) {
         stringstream out;
 
-        out << returnType << " " << functionName << "(";
+        out << returnType << " " << nameSpace << "_" <<functionName << "(";
         for (size_t i = 0; i < parameters.size(); i++) {
             out << parameters.at(i).getType() << " " << parameters.at(i).getPointer()  << parameters.at(i).getName();
             if (i < parameters.size()-1)

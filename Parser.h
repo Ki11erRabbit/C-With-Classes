@@ -354,7 +354,7 @@ private:
     }
     vector<string> parameterList() {
         vector<string> list;
-        if (tokenType() == IDENTIFIER || (tokenType() == OPERATOR && peek() == "*")) {
+        if (tokenType() == IDENTIFIER || (tokenType() == OPERATOR && (peek() == "*" || peek() == "&"))) {
             list.push_back(parameter());
             return parameterList(list);
         }
@@ -363,6 +363,10 @@ private:
             return parameterList(list);
         }
         else if (tokenType() == STRING) {
+            list.push_back(parameter());
+            return parameterList(list);
+        }
+        else if (tokenType() == OPERATOR && subTokenType() == SIZEOF) {
             list.push_back(parameter());
             return parameterList(list);
         }
@@ -371,7 +375,7 @@ private:
         }
     }
     vector<string> parameterList(vector<string> list) {
-        if (tokenType() == IDENTIFIER || (tokenType() == OPERATOR && peek() == "*")) {
+        if (tokenType() == IDENTIFIER || (tokenType() == OPERATOR && (peek() == "*" || peek() == "&"))) {
             list.push_back(parameter());
             return parameterList(list);
         }
@@ -380,6 +384,10 @@ private:
             return parameterList(list);
         }
         else if (tokenType() == STRING) {
+            list.push_back(parameter());
+            return parameterList(list);
+        }
+        else if (tokenType() == OPERATOR && subTokenType() == SIZEOF) {
             list.push_back(parameter());
             return parameterList(list);
         }
@@ -753,6 +761,14 @@ private:
                 throwError();
             return Parameter("", parameterName);
         }
+        else if (tokenType() == IDENTIFIER) {
+            parameterType = match(IDENTIFIER);
+            if (tokenType() == OPERATOR) {
+                parameterPointer = match(OPERATOR);
+            }
+            parameterName = match(IDENTIFIER);
+            return Parameter(parameterType, parameterPointer,parameterName);
+        }
         else {
             throwError();
         }
@@ -773,6 +789,10 @@ private:
             list.push_back(methodParameter());
             return methodParameterList(list);
         }
+        else if (tokenType() == IDENTIFIER) {
+            list.push_back(methodParameter());
+            return methodParameterList(list);
+        }
         else {
             return list;
         }
@@ -788,6 +808,10 @@ private:
             return methodParameterList(list);
         }
         else if (tokenType() == OPERATOR && subTokenType() == TYPE) {//for variable length functions
+            list.push_back(methodParameter());
+            return methodParameterList(list);
+        }
+        else if (tokenType() == IDENTIFIER) {
             list.push_back(methodParameter());
             return methodParameterList(list);
         }

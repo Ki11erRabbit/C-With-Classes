@@ -75,7 +75,7 @@ public:
             out << clasS.makeHeader();
         }
         for (auto function : functions) {
-            out << function.definitionForm();
+            out << function.definitionForm(name);
         }
 
         out << endl << "#endif" << endl;
@@ -91,11 +91,11 @@ public:
         for (auto macro : macros) {
             out << macro << endl;
         }
-        for (auto function : functions) {
-            out << function.functionForm() << endl;
-        }
         for (auto clasS : classes) {
             out << clasS.makeSource() << endl;
+        }
+        for (auto function : functions) {
+            out << function.functionForm(name) << endl;
         }
 
         return out.str();

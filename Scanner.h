@@ -140,6 +140,9 @@ private:
             else if (input.find("size_t") == 0) {//important enough to be a type
                 return {6,{KEYWORD,TYPE}};
             }
+            else if (input.find("ssize_t") == 0) {//important enough to be a type
+                return {7,{KEYWORD,TYPE}};
+            }
             else if (input.find("NULL") == 0) {//important enough to be a type
                 return {4,{IDENTIFIER,TYPE}};
             }
