@@ -91,7 +91,7 @@ public:
             if (i < parameters.size()-1)
                 out << ", ";
         }
-        out << ")";
+        out << ");";
 
         return out.str();
     }
@@ -105,7 +105,7 @@ public:
             if (i < parameters.size()-1)
                 out << ", ";
         }
-        out << ")";
+        out << ");";
 
         return out.str();
     }

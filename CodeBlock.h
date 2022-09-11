@@ -39,6 +39,30 @@ public:
         currentBlock += 1;
     }
 
+    const vector<CodeBlock> &getCodeBlocks() const {
+        return codeBlocks;
+    }
+
+    void setCodeBlocks(const vector<CodeBlock> &codeBlocks) {
+        CodeBlock::codeBlocks = codeBlocks;
+    }
+
+    const vector<std::string> &getLines() const {
+        return lines;
+    }
+
+    void setLines(const vector<std::string> &lines) {
+        CodeBlock::lines = lines;
+    }
+
+    const vector<Parameter> &getVariables() const {
+        return variables;
+    }
+
+    void setVariables(const vector<Parameter> &variables) {
+        CodeBlock::variables = variables;
+    }
+
     std::string toString() {
         std::stringstream out;
         if (statement != "")

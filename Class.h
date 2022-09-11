@@ -24,6 +24,7 @@ private:
     Method defaultConstructor;
     Method pointerConstructor;
     Method deconstructor;
+    Method pointerDeconstructor;
 
     string makeStruct() {
         stringstream out;
@@ -53,13 +54,14 @@ private:
             }
         }
         vector<string> codeBlock;
+        string temp;
         codeBlock.push_back(className + " newObject;");
         for (auto member : memberNeedInit) {
-            codeBlock.push_back(className + "." + member.printWOType() + ";");
+            codeBlock.push_back(temp +"newObject" + "." + member.printWOType() + ";");
         }
 
         for (auto method : methods) {
-            codeBlock.push_back(className + "." + method.getName() + " = " + method.getFunctionName(className) + ";");
+            codeBlock.push_back(temp +"newObject" + "." + method.getName() + " = " + method.getFunctionName(className) + ";");
         }
         codeBlock.push_back("return newObject;");
 
@@ -75,14 +77,15 @@ private:
             }
         }
         vector<string> codeBlock;
-        codeBlock.push_back(className + " newObject;");
-        codeBlock.push_back("newObject = malloc(sizeof(" + className + "));");
+        string temp;
+        codeBlock.push_back(className + " *newObject;");
+        codeBlock.push_back(temp + "newObject = " + "(" + className + "*)malloc(sizeof(" + className + "));");
         for (auto member : memberNeedInit) {
-            codeBlock.push_back(className + "->" + member.printWOType() + ";");
+            codeBlock.push_back(temp +"newObject" + "->" + member.printWOType() + ";");
         }
 
         for (auto method : methods) {
-            codeBlock.push_back(className + "->" + method.getName() + " = " + method.getFunctionName(className) + ";");
+            codeBlock.push_back(temp + "newObject" + "->" + method.getName() + " = " + method.getFunctionName(className) + ";");
         }
         codeBlock.push_back("return newObject;");
 
@@ -95,11 +98,95 @@ private:
         param.push_back(Parameter(className,"*","object"));
         vector<string> codeBlock;
         codeBlock.push_back("free(object);");
-        codeBlock.push_back("return NULL;");
 
-        return Method("NULL",className + "Deconstructor",param,CodeBlock(codeBlock));
+        return Method("void",className + "Deconstructor",param,CodeBlock(codeBlock));
     }
 
+    void findAndSetConstructors() {
+        for (size_t i = 0; i < methods.size(); i++) {
+            if (methods.at(i).getName() == className) {
+                defaultConstructor = methods.at(i);
+                methods.erase(methods.begin()+i);
+                i--;
+                injectVTable(defaultConstructor,0);
+            }
+            if (members.at(i).getName() == "new" + className) {
+                pointerConstructor = methods.at(i);
+                methods.erase(methods.begin()+i);
+                i--;
+                injectVTable(pointerConstructor,1);
+            }
+        }
+        defaultConstructor = createDefaultConstructor();
+        pointerConstructor = createPointerConstructor();
+    }
+
+    void injectVTable(Method constructor, char key) {
+        CodeBlock oldBody = constructor.getBody();
+        vector<Parameter> parameters = oldBody.getVariables();
+        vector<string> lines = oldBody.getLines();
+        Parameter newObject;
+        for (auto var : parameters) {
+            if (var.getType() == className) {
+                newObject = var;
+            }
+        }
+        if (key == 0) {
+            vector<Parameter> memberNeedInit;
+            for (size_t i = 0; i < members.size(); i++) {
+                if (members.at(i).getStoredValue() != "") {
+                    memberNeedInit.push_back(members.at(i));
+                }
+            }
+            vector<string> codeBlock;
+            string temp;
+            codeBlock.push_back(className + " newObject;");
+            for (auto member : memberNeedInit) {
+                lines.insert(lines.begin(),temp + newObject.getName() + "." + member.printWOType() + ";");
+            }
+
+            for (auto method : methods) {
+                lines.insert(lines.end() - 1,temp +"newObject" + "." + method.getName() + " = " + method.getFunctionName(className) + ";");
+            }
+
+            constructor.setBody(CodeBlock("",parameters,lines,oldBody.getCodeBlocks()));
+        }
+        if (key == 1) {
+            vector<Parameter> memberNeedInit;
+            for (size_t i = 0; i < members.size(); i++) {
+                if (members.at(i).getStoredValue() != "") {
+                    memberNeedInit.push_back(members.at(i));
+                }
+            }
+            vector<string> codeBlock;
+            string temp;
+            codeBlock.push_back(className + " newObject;");
+            for (auto member : memberNeedInit) {
+                lines.insert(lines.begin(),temp + newObject.getName() + "." + member.printWOType() + ";");
+            }
+
+            for (auto method : methods) {
+                lines.insert(lines.end() - 1,temp +"newObject" + "->" + method.getName() + " = " + method.getFunctionName(className) + ";");
+            }
+
+            constructor.setBody(CodeBlock("",parameters,lines,oldBody.getCodeBlocks()));
+        }
+    }
+
+    void findAndSetDeconstructors() {
+        for (size_t i = 0; i < methods.size(); i++) {
+            if (methods.at(i).getName() == "_" + className) {
+                deconstructor = methods.at(i);
+                methods.erase(methods.begin()+i);
+                i--;
+            }
+            if (members.at(i).getName() == "_new" + className) {
+                pointerDeconstructor = methods.at(i);
+                methods.erase(methods.begin()+i);
+                i--;
+            }
+        }
+    }
 public:
     Class();
     /*Class(const string &className, const vector<Parameter> &members, vector<Method> methods)
@@ -108,8 +195,7 @@ public:
         this->className = className;
         this->members = members;
         this->methods = methods;
-        this->defaultConstructor = createDefaultConstructor();
-        this->pointerConstructor = createPointerConstructor();
+        findAndSetConstructors();
         this->deconstructor = createDeconstructor();
     }
 

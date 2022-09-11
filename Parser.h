@@ -57,6 +57,7 @@ private:
 
     void throwError() {
         cout << endl << endl << "\t" << tokens.at(0) << endl;
+        cout << tokens.size() << " tokens remaining" << endl;
         throw(tokens.at(0));
     }
 
@@ -304,18 +305,30 @@ private:
             statement += match(STRING);
         }
         else if (tokenType() == IDENTIFIER) {
-            statement += match(IDENTIFIER);
+            if (nextTokenType() == SPECIALCHAR && nextSubTokenType() == OPEN) {
+                statement += functionCall();
+            }
+            else {
+                statement += match(IDENTIFIER);
+            }
+
         }
         else if (tokenType() == KEYWORD) {
             if (peek() == "return") {
                 statement += match(KEYWORD) + " ";
             }
         }
+        else if (tokenType() == SPECIALCHAR && peek() == "["){
+            statement += match(SPECIALCHAR);
+            statement += expression();
+            statement += match(SPECIALCHAR);
+        }
 
         if (subTokenType() == CLOSE || subTokenType() == COMMA || tokenType() == TERMINATOR) {
             if (subTokenType() == COMMA) {
                 match(OPERATOR);
             }
+
             return statement;
         }
         statement += expression();
@@ -444,10 +457,13 @@ private:
                     }
                 }
                 else {
-                    match(OPERATOR);
+                    //match(OPERATOR);
                 }
-                varList.push_back(Parameter(varType,pointer,varName,contents));
-                return variableDeclaration(varList, varType);
+                if (tokenType() == OPERATOR && subTokenType() == COMMA) {
+                    varList.push_back(Parameter(varType,pointer,varName,contents));
+                    return variableDeclaration(varList, varType);
+                }
+
             }
             else if (tokenType() == SPECIALCHAR) {//for array declaration
                 varName += match(SPECIALCHAR);
@@ -504,8 +520,10 @@ private:
             else {
                 match(OPERATOR);
             }
-            varList.push_back(Parameter(varType,pointer,varName,contents));
-            return variableDeclaration(varList, varType);
+            if (tokenType() == OPERATOR && subTokenType() == COMMA) {
+                varList.push_back(Parameter(varType,pointer,varName,contents));
+                return variableDeclaration(varList, varType);
+            }
         }
         else if (tokenType() == SPECIALCHAR) {//for array declaration
             varName += match(SPECIALCHAR);
@@ -536,7 +554,7 @@ private:
 
     vector<vector<Parameter>> variableDeclarationList() {
         vector<vector<Parameter>> list;
-        if (tokenType() == KEYWORD && subTokenType() == TYPE) {
+        if (tokenType() == KEYWORD && subTokenType() == TYPE && isMember()) {
             list.push_back(variableDeclaration());
             return variableDeclarationList(list);
         }
@@ -545,7 +563,7 @@ private:
         }
     }
     vector<vector<Parameter>> variableDeclarationList(vector<vector<Parameter>> list) {
-        if (tokenType() == KEYWORD && subTokenType() == TYPE) {
+        if (tokenType() == KEYWORD && subTokenType() == TYPE && isMember()) {
             list.push_back(variableDeclaration());
             return variableDeclarationList(list);
         }
@@ -794,7 +812,8 @@ private:
                         }
                     }
                 }
-                statement += match(TERMINATOR);
+                //statement += match(TERMINATOR);
+                statement += ";";
                 if (tokenType() == IDENTIFIER || tokenType() == CONSTANT) {
                     statement += expression();
                 }
@@ -844,6 +863,7 @@ private:
                 if (tokenType() == KEYWORD && subTokenType() == TYPE) {
                     if (peek() == "enum") {
                         enums.push_back(enumM());
+                        match(TERMINATOR);
                     }
                     vector<vector<Parameter>> temp = variableDeclarationList();
                     for (auto list : temp) {
@@ -851,9 +871,9 @@ private:
                             variables.push_back(param);
                         }
                     }
-                    if (enums.empty()){
+                    /*if (enums.empty()){
                         match(TERMINATOR);
-                    }
+                    }*/
                 }
                 if (tokenType() == KEYWORD && subTokenType() == CONTROL) {
                     if (peek() == "case" || peek() == "default") {//for within switch statements
@@ -919,6 +939,9 @@ private:
         vector<Parameter> parameters;
         if (tokenType() == KEYWORD) {
             returnType = type();
+            if (peek() == "*") {
+                returnType += match(OPERATOR);
+            }
             methodName = match(IDENTIFIER);
             match(SPECIALCHAR);
 
@@ -976,7 +999,7 @@ private:
 
     vector<Function> functionList() {
         vector<Function> list;
-        if (tokenType() == KEYWORD && isFunction()) {
+        if (!tokens.empty() && tokenType() == KEYWORD && isFunction()) {
             list.push_back(function());
             return functionList(list);
         }
@@ -985,7 +1008,7 @@ private:
         }
     }
     vector<Function> functionList(vector<Function> list) {
-        if (tokenType() == KEYWORD && isFunction()) {
+        if (!tokens.empty() && tokenType() == KEYWORD && isFunction()) {
             list.push_back(function());
             return functionList(list);
         }
@@ -1148,8 +1171,9 @@ public:
         vector<Struct> structs;
         vector<Function> functions;
         vector<Class> classes;
+        size_t i = 0;
         while (!tokens.empty()) {
-            if (tokenType() == PREPROC) {
+            if (!tokens.empty() && tokenType() == PREPROC) {
                 if (peek() == "#include") {
                     vector<string> tempIncludes = includeList();
                     for (auto include : tempIncludes) {
@@ -1163,7 +1187,7 @@ public:
                     }
                 }
             }
-            if (tokenType() == KEYWORD) {
+            if (!tokens.empty() && tokenType() == KEYWORD) {
                 if (peek() == "typedef") {
                     vector<string> tempTypeDefs = typedefList();
                     for (auto typDef : tempTypeDefs) {
@@ -1195,6 +1219,10 @@ public:
                     }
                 }
             }
+            if (!tokens.empty() && tokenType() == COMMENT) {
+                match(COMMENT);
+            }
+            //cout << ++i << " Passes" << endl;
         }
 
         /*for (auto include : includes) {

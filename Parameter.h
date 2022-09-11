@@ -19,6 +19,7 @@ private:
 
 public:
 
+    Parameter();
     Parameter (std::string type, std::string name)
     : type(type), name(name) {};
     Parameter (std::string type, std::string pointer, std::string name)

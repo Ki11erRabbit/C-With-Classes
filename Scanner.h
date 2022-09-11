@@ -141,7 +141,7 @@ private:
                 return {6,{KEYWORD,TYPE}};
             }
             else if (input.find("NULL") == 0) {//important enough to be a type
-                return {4,{KEYWORD,TYPE}};
+                return {4,{IDENTIFIER,TYPE}};
             }
             //Control Flow
             else if (input.find("if") == 0) {
@@ -222,8 +222,9 @@ private:
                 case '\"':
                     return {findStringEnding(),{STRING,NONE}};
                 case '[':
+                    return {1,{SPECIALCHAR,OPEN}};
                 case ']':
-                    return {1,{SPECIALCHAR,NONE}};
+                    return {1,{SPECIALCHAR,CLOSE}};
                 case '(':
                     return {1,{SPECIALCHAR,OPEN}};
                 case ')':
@@ -293,7 +294,7 @@ private:
                     return {1, {OPERATOR,NONE}};
                 case '\'':
                     return {findCharEnding(), {CONSTANT,NONE}};
-                case '~':
+                case '_':
                     return {findEnding(), {IDENTIFIER,NONE}};
                 default:
                     return {findEnding(), {UNDEFINED,NONE}};
@@ -311,9 +312,10 @@ public:
     }
 
     Token scanToken() {
-        while (std::isspace((input.at(0)))) {
-            input = input.substr(1);
-        }
+        if (!input.empty())
+            while (std::isspace((input.at(0)))) {
+               input = input.substr(1);
+          }
 
         std::pair<int,std::pair<TokenType,SubTokenType>> pair = setType();
         std::string value;

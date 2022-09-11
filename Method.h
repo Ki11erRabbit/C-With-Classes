@@ -39,16 +39,29 @@ public:
     string getName() {
         return methodName;
     }
+    CodeBlock getBody() {
+        return body;
+    }
+    void setBody(CodeBlock body) {
+        this->body = body;
+    }
 
     string pointerForm(string className){
         stringstream out;
 
+        if (returnType == className) {
+            out << "struct ";
+        }
         out << returnType << " (*" << methodName << ")(";
         out << "struct " << className << "*";
         if (!parameters.empty())
             out << ", ";
         for (size_t i = 0; i < parameters.size(); i++) {
-            string param = parameters.at(i).getType() + parameters.at(i).getPointer();
+            string param;
+            if (parameters.at(i).getType() == className) {
+                param = "struct ";
+            }
+            param += parameters.at(i).getType() + parameters.at(i).getPointer();
             out << param;
             if (i < parameters.size()-1)
                 out << ", ";
@@ -100,7 +113,7 @@ public:
             if (i < parameters.size()-1)
                 out << ", ";
         }
-        out << ")";
+        out << ");";
 
         return out.str();
     }
@@ -114,7 +127,7 @@ public:
             if (i < parameters.size()-1)
                 out << ", ";
         }
-        out << ")";
+        out << ");";
 
         return out.str();
     }

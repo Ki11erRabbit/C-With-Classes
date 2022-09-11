@@ -71,11 +71,11 @@ public:
         for (auto strucT : structs) {
             out << strucT << endl;
         }
-        for (auto function : functions) {
-            out << function.definitionForm();
-        }
         for (auto clasS : classes) {
             out << clasS.makeHeader();
+        }
+        for (auto function : functions) {
+            out << function.definitionForm();
         }
 
         out << endl << "#endif" << endl;

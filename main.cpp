@@ -23,7 +23,7 @@ int main(int argc, char *argv[]) {
             in.get(currentChar);
             accumulator += currentChar;
         }
-
+        cout << "Making Tokens" << endl;
         Scanner scanner(accumulator);
         vector<Token> tokens;
         Token currToken = scanner.scanToken();
@@ -34,13 +34,15 @@ int main(int argc, char *argv[]) {
             tokens.push_back(currToken);
             //cout << currToken << endl;
         }
+        cout << tokens.size() << " tokens" << endl;
 
-        for (auto token : tokens) {
+        /*for (auto token : tokens) {
             //cout << token << endl;
-        }
+        }*/
         stringstream headerName = stringstream(argv[i]);
         string name;
         getline(headerName,name,'.');
+        cout << "Parsing Tokens" << endl;
         Parser parser(tokens);
         CwithClasses file = parser.startParsing();
         file.setName(name);
