@@ -55,10 +55,22 @@ class String {
             return 0;
         }
     }
+    void reserve(size_t n) {
+        if (n < this->size) {
+            this->str = (char*) realloc(this->str,this->size);
+            this->maxSize = this->size;
+        }
+        else {
+            this->str = (char*) realloc(this->str,n);
+            this->maxSize = n;
+        }
+    }
+
     void clear() {
         for (size_t i = 0; i < this->size; i++) {
             this->str[i] = '\0';
         }
+        this->size = 0;
     }
     void resize(size_t n) {
         for (size_t i = 0; i < this->maxSize; i++) {
