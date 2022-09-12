@@ -760,13 +760,13 @@ class String {
             exit(1);
         }
         if (pos == this->size) {
-            return String__String("");
+            return String__StringStr("");
         }
         if (len > this->size)
             len = this->size;
 
-        char *tempChar = strndup(this->str+pos,len-pos);
-        String newString = String__String(tempChar);
+        char *tempChar = strndup(this->str+pos,len-pos + 1);
+        String newString = String__StringStr(tempChar);
         free(tempChar);
         return newString;
     }
