@@ -16,15 +16,15 @@ class String {
     String StringStr(char* str) {
         String newString;
         newString.str = strdup(str);
-        newString.size = sizeof(str);
-        newString.maxSize = sizeof(str);
+        newString.size = strlen(str);
+        newString.maxSize = strlen(str) + 1;
         return newString;
     }
     String* newStringStr(char* str) {
         String *newString;
         newString->str = strdup(str);
-        newString->size = sizeof(str);
-        newString->maxSize = sizeof(str);
+        newString->size = strlen(str);
+        newString->maxSize = strlen(str) + 1;
         return newString;
     }
 
@@ -73,25 +73,54 @@ class String {
         this->size = 0;
     }
     void resize(size_t n) {
-        for (size_t i = 0; i < this->maxSize; i++) {
-            this->str[i] = '\0';
-        }
-        this->size = n;
-    }
-    void resizeWithChar(size_t n, char c) {
-        for (size_t i = 0; i < this->maxSize; i++) {
-            if (i <= n) {
-                this->str[i] = c;
+        if (n > this->size) {
+            if (n > this->maxSize) {
+                this->str = (char*) realloc(this->str, n);
+                this->maxSize = n;
+                for (size_t i = this->size; i < this->maxSize; i++) {
+                    this->str[i] = '\0';
+                }
             }
             else {
+                for (size_t i = this->size; i < this->maxSize; i++) {
+                    this->str[i] = '\0';
+                }
+            }
+        }
+        else {
+            this->size = n;
+            for (size_t i = n; i < this->maxSize; i++) {
                 this->str[i] = '\0';
             }
         }
-        this->size = n;
+    }
+    void resizeWithChar(size_t n, char c) {
+        if (n > this->size) {
+            if (n > this->maxSize) {
+                this->str = (char*) realloc(this->str, n);
+                this->maxSize = n;
+                for (size_t i = this->size; i < this->maxSize; i++) {
+                    this->str[i] = c;
+                }
+            }
+            else {
+                for (size_t i = this->size; i < this->maxSize; i++) {
+                    this->str[i] = c;
+                }
+            }
+        }
+        else {
+            this->size = n;
+            for (size_t i = n; i < this->maxSize; i++) {
+                this->str[i] = '\0';
+            }
+        }
     }
     void shrink_to_fit() {
         if (this->size < this->maxSize) {
-            this->str = (char*) realloc(this->str, this->size);
+            this->str = (char*) realloc(this->str, this->size + 1);
+            this->maxSize = this->size + 1;
+            this->str[this->size] = '\0';
         }
     }
 
@@ -116,10 +145,14 @@ class String {
     }
 
     String appendString(String *str) {
-        size_t totalSize = this->size + str->size;
+        size_t totalSize = this->size + str->size + 1;
         if (totalSize > this->maxSize) {
             this->str = (char*) realloc(this->str, totalSize);
             this->maxSize = totalSize;
+        }
+        else if (totalSize == this->maxSize) {
+            this->str = (char*) realloc(this->str, totalSize + 1);
+            this->maxSize = totalSize + 1;
         }
         strcat(this->str,str->str);
         this->size = totalSize;
@@ -127,59 +160,87 @@ class String {
         return *this;
     }
     String appendSubstring(String *str, size_t subpos, size_t sublen) {
-        if (sublen > str->size) {
+        if (subpos > str->size) {
             fprintf(stderr, "%s", "Error. Out of bounds access of substring");
             exit(1);
         }
-        size_t totalSize = this->size + sublen - subpos;
+        if (sublen > str->size) {
+            sublen = str->size;
+        }
+        size_t totalSize = this->size + sublen - subpos +1;
         if (totalSize > this->maxSize) {
             this->str = (char*) realloc(this->str, totalSize);
             this->maxSize = totalSize;
         }
-        for (size_t i = this->size; i < this->maxSize && subpos < sublen; i++) {
-            this->str[i] = str->str[subpos];
-            subpos++;
+        else if (totalSize == this->maxSize) {
+            this->str = (char*) realloc(this->str, totalSize + 1);
+            this->maxSize = totalSize + 1;
         }
+        if (sublen == str->size) {
+            strncat(this->str,str->str+subpos,sublen);
+        }
+        else {
+            strncat(this->str,str->str+subpos,sublen - subpos + 1);
+        }
+
         return *this;
     }
     String appendStr(char* s) {
         size_t strlength = strlen(s);
-        size_t totalSize = this->size + strlength;
+        size_t totalSize = this->size + strlength +1;
         if (totalSize > this->maxSize) {
             this->str = (char*) realloc(this->str, totalSize);
             this->maxSize = totalSize;
+        }
+        else if (totalSize == this->maxSize) {
+            this->str = (char*) realloc(this->str, totalSize + 1);
+            this->maxSize = totalSize + 1;
         }
         strcat(this->str,s);
         this->size = strlen(this->str);
         return *this;
     }
     String appendBuffer(char *buffer, size_t n) {
-        size_t totalSize = this->size + n;
+        size_t totalSize = this->size + n + 1;
         if (totalSize > this->maxSize) {
             this->str = (char*)realloc(this->str,totalSize);
             this->maxSize = totalSize;
+        }
+        else if (totalSize == this->maxSize) {
+            this->str = (char*) realloc(this->str, totalSize + 1);
+            this->maxSize = totalSize + 1;
         }
         strncpy(this->str,buffer,n);
         this->size = strlen(this->str);
         return *this;
     }
     String appendFill(size_t n, char c) {
-        size_t totalSize = this->size + n;
+        size_t totalSize = this->size + n +1;
         if (totalSize > this->maxSize) {
             this->str = (char*)realloc(this->str, totalSize);
             this->maxSize = totalSize;
         }
-        for (size_t i = this->size; this->maxSize - i < n; i++) {
-            this->str[i] = c;
+        else if (totalSize == this->maxSize) {
+            this->str = (char*) realloc(this->str, totalSize + 1);
+            this->maxSize = totalSize + 1;
         }
+        for(size_t i = this->size;i < this->maxSize;i++) {
+            this->str[i]=c;
+        }
+        this->str[this->maxSize-1] = '\0';
+        this->size = this->maxSize -1;
         return *this;
     }
 
     void push_back(char c) {
-        size_t totalSize = this->size + 1;
+        size_t totalSize = this->size + 2;
         if (totalSize > this->maxSize) {
             this->str = (char*) realloc(this->str, totalSize);
             this->maxSize = totalSize;
+        }
+        else if (totalSize == this->maxSize) {
+            this->str = (char*) realloc(this->str, totalSize + 1);
+            this->maxSize = totalSize + 1;
         }
         this->str[this->maxSize - 1] = c;
     }
@@ -242,10 +303,14 @@ class String {
             fprintf(stderr, "%s", "Error: out of bounds");
             exit(1);
         }
-        size_t totalSize = this->size + str->size;
+        size_t totalSize = this->size + str->size + 1;
         if (totalSize > this->maxSize) {
             this->str = (char*) realloc(this->str,totalSize);
             this->maxSize = totalSize;
+        }
+        else if (totalSize == this->maxSize) {
+            this->str = (char*) realloc(this->str, totalSize + 1);
+            this->maxSize = totalSize + 1;
         }
         char* tempStr = strdup(this->str+pos);
         this->str[pos] = '\0';
@@ -264,14 +329,24 @@ class String {
         if (sublen > str->size) {
             sublen = str->size;
         }
-        size_t totalSize = this->size + str->size;
+        size_t totalSize = this->size + str->size +1;
         if (totalSize > this->maxSize) {
             this->str = (char*) realloc(this->str,totalSize);
             this->maxSize = totalSize;
         }
+        else if (totalSize == this->maxSize) {
+            this->str = (char*) realloc(this->str, totalSize + 1);
+            this->maxSize = totalSize + 1;
+        }
         char* tempStr = strdup(this->str+pos);
         this->str[pos] = '\0';
-        strncat(this->str,str->str+subpos,sublen);
+        if (sublen == str->size) {
+            strncat(this->str,str->str+subpos,sublen + 1);
+        }
+        else {
+            strncat(this->str,str->str+subpos,sublen - subpos + 1);
+        }
+
         strcat(this->str,tempStr);
         free(tempStr);
         this->size = strlen(this->str);
@@ -283,10 +358,14 @@ class String {
             fprintf(stderr, "%s", "Error: out of bounds");
             exit(1);
         }
-        size_t totalSize = this->size + strlen(s);
+        size_t totalSize = this->size + strlen(s) + 1;
         if (totalSize > this->maxSize) {
             this->str = (char*) realloc(this->str,totalSize);
             this->maxSize = totalSize;
+        }
+        else if (totalSize == this->maxSize) {
+            this->str = (char*) realloc(this->str, totalSize + 1);
+            this->maxSize = totalSize + 1;
         }
         char* tempStr = strdup(this->str+pos);
         this->str[pos] = '\0';
@@ -302,10 +381,14 @@ class String {
             fprintf(stderr, "%s", "Error: out of bounds");
             exit(1);
         }
-        size_t totalSize = this->size + n;
+        size_t totalSize = this->size + n +1;
         if (totalSize > this->maxSize) {
             this->str = (char*) realloc(this->str,totalSize);
             this->maxSize = totalSize;
+        }
+        else if (totalSize == this->maxSize) {
+            this->str = (char*) realloc(this->str, totalSize + 1);
+            this->maxSize = totalSize + 1;
         }
         char* tempStr = strdup(this->str+pos);
         this->str[pos] = '\0';
@@ -321,10 +404,14 @@ class String {
             fprintf(stderr, "%s", "Error: out of bounds");
             exit(1);
         }
-        size_t totalSize = this->size + n;
+        size_t totalSize = this->size + n +1;
         if (totalSize > this->maxSize) {
             this->str = (char*) realloc(this->str,totalSize);
             this->maxSize = totalSize;
+        }
+        else if (totalSize == this->maxSize) {
+            this->str = (char*) realloc(this->str, totalSize + 1);
+            this->maxSize = totalSize + 1;
         }
         char *fillStr = (char*)malloc(sizeof(char) * n);
         for (size_t i = 0; i < n; i++) {
@@ -345,10 +432,14 @@ class String {
             fprintf(stderr, "%s", "Error: out of bounds");
             exit(1);
         }
-        size_t totalSize = this->size + 1;
+        size_t totalSize = this->size + 2;
         if (totalSize > this->maxSize) {
             this->str = (char*) realloc(this->str,totalSize);
             this->maxSize = totalSize;
+        }
+        else if (totalSize == this->maxSize) {
+            this->str = (char*) realloc(this->str, totalSize + 1);
+            this->maxSize = totalSize + 1;
         }
 
         char* tempStr = strdup(this->str+pos);
@@ -372,10 +463,14 @@ class String {
         for(size_t i = pos; i < len; i++) {
             this->str[i] = '\0';
         }
-        size_t totalSize = this->size + str->size;
+        size_t totalSize = this->size + str->size +1;
         if (totalSize > this->maxSize) {
             this->str = (char*) realloc(this->str,totalSize);
             this->maxSize = totalSize;
+        }
+        else if (totalSize == this->maxSize) {
+            this->str = (char*) realloc(this->str, totalSize + 1);
+            this->maxSize = totalSize + 1;
         }
         if (len != this->size) {
             char *endChar = strdup(this->str+pos);
@@ -405,20 +500,34 @@ class String {
         for(size_t i = pos; i < len; i++) {
             this->str[i] = '\0';
         }
-        size_t totalSize = this->size + sublen - subpos;
+        size_t totalSize = this->size + sublen - subpos +1;
         if (totalSize > this->maxSize) {
             this->str = (char*) realloc(this->str,totalSize);
             this->maxSize = totalSize;
+        }
+        else if (totalSize == this->maxSize) {
+            this->str = (char*) realloc(this->str, totalSize + 1);
+            this->maxSize = totalSize + 1;
         }
         if (len != this->size) {
             char *endChar = strdup(this->str+pos);
             (this->str+pos)[0] = '\0';
 
-            strncat(this->str,str->str + subpos,sublen);
+            if (sublen == str->size) {
+                strncat(this->str,str->str + subpos,sublen);
+            }
+            else {
+                strncat(this->str,str->str + subpos,sublen - subpos + 1);
+            }
             strcat(this->str, endChar);
         }
         else {
-            strncat(this->str,str->str + subpos,sublen);
+            if (sublen == str->size) {
+                strncat(this->str,str->str + subpos,sublen);
+            }
+            else {
+                strncat(this->str,str->str + subpos,sublen - subpos + 1);
+            }
         }
         this->size = strlen(this->str);
 
@@ -435,10 +544,14 @@ class String {
         for(size_t i = pos; i < len; i++) {
             this->str[i] = '\0';
         }
-        size_t totalSize = this->size + strlen(s);
+        size_t totalSize = this->size + strlen(s) +1;
         if (totalSize > this->maxSize) {
             this->str = (char*) realloc(this->str,totalSize);
             this->maxSize = totalSize;
+        }
+        else if (totalSize == this->maxSize) {
+            this->str = (char*) realloc(this->str, totalSize + 1);
+            this->maxSize = totalSize + 1;
         }
         if (len != this->size) {
             char *endChar = strdup(this->str+pos);
@@ -465,10 +578,14 @@ class String {
         for(size_t i = pos; i < len; i++) {
             this->str[i] = '\0';
         }
-        size_t totalSize = this->size + n;
+        size_t totalSize = this->size + n +1;
         if (totalSize > this->maxSize) {
             this->str = (char*) realloc(this->str,totalSize);
             this->maxSize = totalSize;
+        }
+        else if (totalSize == this->maxSize) {
+            this->str = (char*) realloc(this->str, totalSize + 1);
+            this->maxSize = totalSize + 1;
         }
         if (len != this->size) {
             char *endChar = strdup(this->str+pos);
@@ -495,10 +612,14 @@ class String {
         for(size_t i = pos; i < len; i++) {
             this->str[i] = '\0';
         }
-        size_t totalSize = this->size + n;
+        size_t totalSize = this->size + n +1;
         if (totalSize > this->maxSize) {
             this->str = (char*) realloc(this->str,totalSize);
             this->maxSize = totalSize;
+        }
+        else if (totalSize == this->maxSize) {
+            this->str = (char*) realloc(this->str, totalSize + 1);
+            this->maxSize = totalSize + 1;
         }
         char* fillStr = (char*) malloc(sizeof(char) * n);
         if (len != this->size) {
@@ -529,7 +650,17 @@ class String {
         return *this;
     }
     String eraseSubstring(size_t pos, size_t len) {
-        if (pos > this->size || len > this->size) {
+        if (pos > this->size * this->size) {
+            pos = 0;
+        }
+        else if (pos > this->size) {
+            fprintf(stderr, "%s", "Error: out of bounds");
+            exit(1);
+        }
+        if (len > this->size * this->size) {
+            len = this->size;
+        }
+        else if (len > this->size) {
             fprintf(stderr, "%s", "Error: out of bounds");
             exit(1);
         }
@@ -596,14 +727,22 @@ class String {
         }
     }
     size_t copy(char* s, size_t len, size_t pos) {
-        if (pos > this->size) {
+        if (pos > this->size * this->size) {
+            pos = 0;
+        }
+        else if (pos > this->size) {
             fprintf(stderr, "%s", "Error: out of bounds");
             exit(1);
         }
         if (len > this->size)
             len = this->size;
         if (pos != 0) {
-            strncat(s,this->str+pos,len);
+            if (len == this->size) {
+                strncat(s,this->str+pos,len);
+            }
+            else {
+                strncat(s,this->str+pos,len - pos + 1);
+            }
         }
         else {
             strncat(s,this->str,len);
@@ -645,11 +784,15 @@ class String {
 
 size_t getline(FILE* in,String* str, char* delim) {
     if (delim == NULL) {
-        ssize_t output = getline(&str->str,NULL,in);
+        ssize_t output = getline(&str->str,&str->size,in);
+        str->size = strlen(str->str);
+        str->maxSize = str->size;
         return output;
     }
     else {
-        ssize_t output = getdelim(&str->str,NULL,*delim,in);
+        ssize_t output = getdelim(&str->str,&str->size,*delim,in);
+        str->size = strlen(str->str);
+        str->maxSize = str->size;
         return output;
     }
 }
