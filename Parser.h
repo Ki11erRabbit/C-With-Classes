@@ -885,6 +885,7 @@ private:
             match(BRACE);
 
             do {//makes sure all variables outside of codeblocks are declared
+                int varCount = 0;
                 if (tokenType() == KEYWORD && subTokenType() == TYPE) {
                     if (peek() == "enum") {
                         enums.push_back(enumM());
@@ -894,8 +895,11 @@ private:
                     for (auto list : temp) {
                         for (auto param : list) {
                             variables.push_back(param);
+                            varCount++;
                         }
                     }
+                    for (int i = 0; i < varCount; i++)
+                        lines.push_back("}{");
                     /*if (enums.empty()){
                         match(TERMINATOR);
                     }*/

@@ -183,7 +183,7 @@ private:
             string temp;
             codeBlock.push_back(className + " " + newObject.getName() +";");
             for (auto member : memberNeedInit) {
-                lines.insert(lines.begin(),temp + newObject.getName() + "." + member.printWOTypePointer() + ";");
+                lines.insert(lines.begin() + 1,temp + newObject.getName() + "." + member.printWOTypePointer() + ";");
             }
 
             for (auto method : methods) {
@@ -213,7 +213,7 @@ private:
             string temp;
             codeBlock.push_back(className + " " + newObject.getName() +";");
             for (auto member : memberNeedInit) {
-                lines.insert(lines.begin(),temp + newObject.getName() + "->" + member.printWOTypePointer() + ";");
+                lines.insert(lines.begin() + 1,temp + newObject.getName() + "->" + member.printWOTypePointer() + ";");
             }
 
             for (auto method : methods) {

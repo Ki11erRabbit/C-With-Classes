@@ -21,6 +21,7 @@ private:
     std::vector<Parameter> variables;
     std::vector<Enum> enums;
     size_t currentBlock = 0;
+    size_t currentVar = 0;
 
 public:
 
@@ -37,6 +38,9 @@ public:
             : lines(lines) {}
     void incrementCurrentBlock() {
         currentBlock += 1;
+    }
+    void incrementCurrentVar() {
+        currentVar += 1;
     }
 
     const vector<CodeBlock> &getCodeBlocks() const {
@@ -68,9 +72,9 @@ public:
         if (statement != "")
             out << statement << " ";
         out << "{" << std::endl;
-        for (auto var : variables) {
+        /*for (auto var : variables) {
             out << var << ";" << std::endl;
-        }
+        }*/
         for (auto enuM : enums) {
             out << enuM << endl;
         }
@@ -78,6 +82,10 @@ public:
             if ( line == "{}") {
                 out << codeBlocks.at(currentBlock);
                 incrementCurrentBlock();
+            }
+            else if (line == "}{") {
+                out << variables.at(currentVar) << ";" << endl;
+                incrementCurrentVar();
             }
             else {
                 out << line << std::endl;
