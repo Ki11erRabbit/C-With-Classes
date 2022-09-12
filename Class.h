@@ -52,22 +52,28 @@ private:
         for (size_t i = 0; i < members.size(); i++) {
             if (members.at(i).getStoredValue() != "") {
                 memberNeedInit.push_back(members.at(i));
-                members.at(i).setStoredValue("");
+            }
+            if (members.at(i).getPointer() != "") {
+                members.at(i).setStoredValue("NULL");
+                memberNeedInit.push_back(members.at(i));
             }
         }
         vector<string> codeBlock;
         string temp;
         codeBlock.push_back(className + " newObject;");
         for (auto member : memberNeedInit) {
-            codeBlock.push_back(temp +"newObject" + "." + member.printWOType() + ";");
+            codeBlock.push_back(temp +"newObject" + "." + member.printWOTypePointer() + ";");
         }
 
         for (auto method : methods) {
+            if (method.getName() == "new" + className || method.getName() == "_new" + className || method.getName() == "_" + className) {
+                continue;
+            }
             codeBlock.push_back(temp +"newObject" + "." + method.getName() + " = " + method.getFunctionName(className) + ";");
         }
         codeBlock.push_back("return newObject;");
 
-        return Method(className,className + "Default",CodeBlock(codeBlock));
+        return Method(className,className,CodeBlock(codeBlock));
     }
 
     Method createPointerConstructor() {
@@ -75,7 +81,10 @@ private:
         for (size_t i = 0; i < members.size(); i++) {
             if (members.at(i).getStoredValue() != "") {
                 memberNeedInit.push_back(members.at(i));
-                members.at(i).setStoredValue("");
+            }
+            if (members.at(i).getPointer() != "") {
+                members.at(i).setStoredValue("NULL");
+                memberNeedInit.push_back(members.at(i));
             }
         }
         vector<string> codeBlock;
@@ -83,15 +92,18 @@ private:
         codeBlock.push_back(className + " *newObject;");
         codeBlock.push_back(temp + "newObject = " + "(" + className + "*)malloc(sizeof(" + className + "));");
         for (auto member : memberNeedInit) {
-            codeBlock.push_back(temp +"newObject" + "->" + member.printWOType() + ";");
+            codeBlock.push_back(temp +"newObject" + "->" + member.printWOTypePointer() + ";");
         }
 
         for (auto method : methods) {
+            if (method.getName() == "new" + className || method.getName() == "_new" + className || method.getName() == "_" + className) {
+                continue;
+            }
             codeBlock.push_back(temp + "newObject" + "->" + method.getName() + " = " + method.getFunctionName(className) + ";");
         }
         codeBlock.push_back("return newObject;");
 
-        return Method(className + "*",className + "Pointer",CodeBlock(codeBlock));
+        return Method(className + "*","new" + className,CodeBlock(codeBlock));
     }
 
     Method createDeconstructor() {
@@ -113,26 +125,30 @@ private:
                 methods.erase(methods.begin()+i);
                 if (i > 0)
                     i--;
-                injectVTable(defaultConstructor,0);
+                //injectVTable(defaultConstructor,0);
                 dConstruct = true;
             }
-            else if (methods.at(i).getName().find(className) == 0) {
-                injectVTable(methods.at(i),0);
+            if (methods.at(i).getName().find(className) == 0) {
                 altConstructors.push_back(methods.at(i));
                 methods.erase(methods.begin()+i);
+                //injectVTable(altConstructors.back(),0);
+                if (i > 0)
+                    i--;
             }
             if (methods.at(i).getName() == "new" + className) {
                 pointerConstructor = methods.at(i);
                 methods.erase(methods.begin()+i);
                 if (i > 0)
                     i--;
-                injectVTable(pointerConstructor,1);
+                //injectVTable(pointerConstructor,1);
                 pConstruct = true;
             }
-            else if (methods.at(i).getName().find("new" + className) == 0) {
-                injectVTable(methods.at(i),1);
+            if (methods.at(i).getName().find("new" + className) == 0) {
                 altPointerConstructors.push_back(methods.at(i));
                 methods.erase(methods.begin()+i);
+                //injectVTable(altPointerConstructors.back(),1);
+                if (i > 0)
+                    i--;
             }
         }
         if (!dConstruct)
@@ -156,6 +172,10 @@ private:
             vector<Parameter> memberNeedInit;
             for (size_t i = 0; i < members.size(); i++) {
                 if (members.at(i).getStoredValue() != "") {
+                    memberNeedInit.push_back(members.at(i));
+                }
+                if (members.at(i).getPointer() != "") {
+                    members.at(i).setStoredValue("NULL");
                     memberNeedInit.push_back(members.at(i));
                 }
             }
@@ -245,6 +265,12 @@ public:
         this->methods = methods;
         findAndSetConstructors();
         findAndSetDeconstructors();
+        for (size_t i = 0; i < altConstructors.size(); i++) {
+            injectVTable(altConstructors.at(i),0);
+        }
+        for (size_t i = 0; i < altPointerConstructors.size(); i++) {
+            injectVTable(altPointerConstructors.at(i),1);
+        }
     }
 
     const string &getClassName() const {
