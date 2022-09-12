@@ -460,29 +460,28 @@ class String {
             fprintf(stderr, "%s", "Error: out of bounds");
             exit(1);
         }
-        for(size_t i = pos; i < len; i++) {
-            this->str[i] = '\0';
-        }
-        size_t totalSize = this->size + str->size +1;
-        if (totalSize > this->maxSize) {
-            this->str = (char*) realloc(this->str,totalSize);
-            this->maxSize = totalSize;
-        }
-        else if (totalSize == this->maxSize) {
-            this->str = (char*) realloc(this->str, totalSize + 1);
-            this->maxSize = totalSize + 1;
-        }
-        if (len != this->size) {
-            char *endChar = strdup(this->str+pos);
-            (this->str+pos)[0] = '\0';
 
-            strcat(this->str,str->str);
-            strcat(this->str, endChar);
+        size_t totalSize = this->size + str->size +1;
+        char * newPointer = NULL;
+        if (totalSize == this->maxSize) {
+            newPointer = (char*) malloc(totalSize + 1);
         }
         else {
-            strcat(this->str,str->str);
+            newPointer = (char*) malloc(totalSize);
         }
+        for (size_t i = 0; i < totalSize; i++) {
+            newPointer[i] = '\0';
+        }
+
+        strncat(newPointer,this->str,pos);
+        strcat(newPointer,str->str);
+        strcat(newPointer,this->str+len);
+        free(this->str);
+        this->str = newPointer;
         this->size = strlen(this->str);
+        this->maxSize = strlen(this->str) +1;
+
+
 
         return *this;
     }
@@ -497,39 +496,26 @@ class String {
             fprintf(stderr, "%s", "Error: out of bounds");
             exit(1);
         }
-        for(size_t i = pos; i < len; i++) {
-            this->str[i] = '\0';
-        }
         size_t totalSize = this->size + sublen - subpos +1;
-        if (totalSize > this->maxSize) {
-            this->str = (char*) realloc(this->str,totalSize);
-            this->maxSize = totalSize;
-        }
-        else if (totalSize == this->maxSize) {
-            this->str = (char*) realloc(this->str, totalSize + 1);
-            this->maxSize = totalSize + 1;
-        }
-        if (len != this->size) {
-            char *endChar = strdup(this->str+pos);
-            (this->str+pos)[0] = '\0';
 
-            if (sublen == str->size) {
-                strncat(this->str,str->str + subpos,sublen);
-            }
-            else {
-                strncat(this->str,str->str + subpos,sublen - subpos + 1);
-            }
-            strcat(this->str, endChar);
+        char * newPointer = NULL;
+        if (totalSize == this->maxSize) {
+            newPointer = (char*) malloc(totalSize + 1);
         }
         else {
-            if (sublen == str->size) {
-                strncat(this->str,str->str + subpos,sublen);
-            }
-            else {
-                strncat(this->str,str->str + subpos,sublen - subpos + 1);
-            }
+            newPointer = (char*) malloc(totalSize);
         }
+        for (size_t i = 0; i < totalSize; i++) {
+            newPointer[i] = '\0';
+        }
+
+        strncat(newPointer,this->str,pos);
+        strncat(newPointer,str->str + subpos, sublen - pos + 1);
+        strcat(newPointer,this->str+len);
+        free(this->str);
+        this->str = newPointer;
         this->size = strlen(this->str);
+        this->maxSize = strlen(this->str) +1;
 
         return *this;
     }
@@ -541,29 +527,26 @@ class String {
             fprintf(stderr, "%s", "Error: out of bounds");
             exit(1);
         }
-        for(size_t i = pos; i < len; i++) {
-            this->str[i] = '\0';
-        }
         size_t totalSize = this->size + strlen(s) +1;
-        if (totalSize > this->maxSize) {
-            this->str = (char*) realloc(this->str,totalSize);
-            this->maxSize = totalSize;
-        }
-        else if (totalSize == this->maxSize) {
-            this->str = (char*) realloc(this->str, totalSize + 1);
-            this->maxSize = totalSize + 1;
-        }
-        if (len != this->size) {
-            char *endChar = strdup(this->str+pos);
-            (this->str+pos)[0] = '\0';
-
-            strcat(this->str,s);
-            strcat(this->str, endChar);
+        char * newPointer = NULL;
+        if (totalSize == this->maxSize) {
+            newPointer = (char*) malloc(totalSize + 1);
         }
         else {
-            strcat(this->str,s);
+            newPointer = (char*) malloc(totalSize);
         }
+        for (size_t i = 0; i < totalSize; i++) {
+            newPointer[i] = '\0';
+        }
+
+        strncat(newPointer,this->str,pos);
+        strcat(newPointer,s);
+        strcat(newPointer,this->str+len);
+        free(this->str);
+        this->str = newPointer;
         this->size = strlen(this->str);
+        this->maxSize = strlen(this->str) +1;
+
 
         return *this;
     }
@@ -575,29 +558,25 @@ class String {
             fprintf(stderr, "%s", "Error: out of bounds");
             exit(1);
         }
-        for(size_t i = pos; i < len; i++) {
-            this->str[i] = '\0';
-        }
         size_t totalSize = this->size + n +1;
-        if (totalSize > this->maxSize) {
-            this->str = (char*) realloc(this->str,totalSize);
-            this->maxSize = totalSize;
-        }
-        else if (totalSize == this->maxSize) {
-            this->str = (char*) realloc(this->str, totalSize + 1);
-            this->maxSize = totalSize + 1;
-        }
-        if (len != this->size) {
-            char *endChar = strdup(this->str+pos);
-            (this->str+pos)[0] = '\0';
-
-            strncat(this->str,buffer,n);
-            strcat(this->str, endChar);
+        char * newPointer = NULL;
+        if (totalSize == this->maxSize) {
+            newPointer = (char*) malloc(totalSize + 1);
         }
         else {
-            strncat(this->str,buffer,n);
+            newPointer = (char*) malloc(totalSize);
         }
+        for (size_t i = 0; i < totalSize; i++) {
+            newPointer[i] = '\0';
+        }
+
+        strncat(newPointer,this->str,pos);
+        strncat(newPointer,buffer,n);
+        strcat(newPointer,this->str+len);
+        free(this->str);
+        this->str = newPointer;
         this->size = strlen(this->str);
+        this->maxSize = strlen(this->str) +1;
 
         return *this;
     }
@@ -609,31 +588,32 @@ class String {
             fprintf(stderr, "%s", "Error: out of bounds");
             exit(1);
         }
-        for(size_t i = pos; i < len; i++) {
-            this->str[i] = '\0';
-        }
         size_t totalSize = this->size + n +1;
-        if (totalSize > this->maxSize) {
-            this->str = (char*) realloc(this->str,totalSize);
-            this->maxSize = totalSize;
-        }
-        else if (totalSize == this->maxSize) {
-            this->str = (char*) realloc(this->str, totalSize + 1);
-            this->maxSize = totalSize + 1;
-        }
-        char* fillStr = (char*) malloc(sizeof(char) * n);
-        if (len != this->size) {
-            char *endChar = strdup(this->str+pos);
-            (this->str+pos)[0] = '\0';
-
-            strcat(this->str,fillStr);
-            strcat(this->str, endChar);
+        char * newPointer = NULL;
+        if (totalSize == this->maxSize) {
+            newPointer = (char*) malloc(totalSize + 1);
         }
         else {
-            strcat(this->str,fillStr);
+            newPointer = (char*) malloc(totalSize);
         }
+        for (size_t i = 0; i < totalSize; i++) {
+            newPointer[i] = '\0';
+        }
+        char *fill = NULL;
+        fill = (char*) malloc(n + 1);
+        for (size_t i = 0; i <= n; i++)
+            fill[i] = '\0';
+        for (size_t i = 0; i < n; i++)
+            fill[i] = c;
+
+        strncat(newPointer,this->str,pos);
+        strcat(newPointer,fill);
+        strcat(newPointer,this->str+len);
+        free(this->str);
+        free(fill);
+        this->str = newPointer;
         this->size = strlen(this->str);
-        free(fillStr);
+        this->maxSize = strlen(this->str) +1;
 
         return *this;
     }
@@ -643,13 +623,22 @@ class String {
             fprintf(stderr, "%s", "Error: out of bounds");
             exit(1);
         }
-        this->str[pos] = '\0';
-        strcat(this->str,this->str+pos);
+        char *newString = NULL;
+        newString = (char*) malloc(this->size);
+        for (size_t i = 0; i < this->size -1; i++) {
+            newString[i] = '\0';
+        }
+        strncat(newString, this->str, pos);
+        strcat(newString,this->str + pos + 1);
+
+        free(this->str);
+        this->str = newString;
         this->size = this->size -1;
+        this->maxSize = this->maxSize -1;
 
         return *this;
     }
-    String eraseSubstring(size_t pos, size_t len) {
+    String eraseSeq(size_t pos, size_t len) {
         if (pos > this->size * this->size) {
             pos = 0;
         }
@@ -664,11 +653,18 @@ class String {
             fprintf(stderr, "%s", "Error: out of bounds");
             exit(1);
         }
-        for (size_t i = pos; i <= len; i++) {
-            this->str[i] = '\0';
+        char *newString = NULL;
+        newString = (char*) malloc(this->size);
+        for (size_t i = 0; i < this->size -1; i++) {
+            newString[i] = '\0';
         }
-        this->size = this->size - (len - pos);
-        strcat(this->str, this->str+pos);
+        strncat(newString, this->str, pos);
+        strcat(newString,this->str + len);
+
+        free(this->str);
+        this->str = newString;
+        this->size = this->size -1;
+        this->maxSize = this->maxSize -1;
 
         return *this;
     }
