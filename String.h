@@ -631,8 +631,12 @@ class String {
         strncat(newString, this->str, pos);
         strcat(newString,this->str + pos + 1);
 
-        free(this->str);
-        this->str = newString;
+        for (size_t i = 0; i < this->size; i++)
+            this->str[i] = '\0';
+        this->str = (char*) realloc(this->str, this->maxSize -1);
+
+        strcat(this->str,newString);
+        free(newString);
         this->size = this->size -1;
         this->maxSize = this->maxSize -1;
 
@@ -661,8 +665,12 @@ class String {
         strncat(newString, this->str, pos);
         strcat(newString,this->str + len);
 
-        free(this->str);
-        this->str = newString;
+        for (size_t i = 0; i < this->size; i++)
+            this->str[i] = '\0';
+        this->str = (char*) realloc(this->str, this->maxSize - (len - pos));
+
+        strcat(this->str,newString);
+        free(newString);
         this->size = this->size -1;
         this->maxSize = this->maxSize -1;
 
@@ -775,6 +783,10 @@ class String {
     }
     int compareStr(char *s) {
         return strcmp(this->str,s);
+    }
+
+    const char* toCStr() {
+        return this->str;
     }
 };
 
