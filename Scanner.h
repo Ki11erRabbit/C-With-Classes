@@ -246,6 +246,7 @@ private:
                     return {1, {SPECIALCHAR,NONE}};
                 case ':':
                 case '?':
+                    return {1, {OPERATOR,NONE}};
                 case '.':
                     if (input.at(1) == '.') {
                         return {3,{OPERATOR,TYPE}};

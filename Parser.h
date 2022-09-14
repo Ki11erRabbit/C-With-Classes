@@ -920,6 +920,12 @@ private:
                         lines.push_back(line);
                         line = "";
                     }
+                    else if (peek() == "goto") {
+                        line += match(KEYWORD) + " ";
+                        line += expression();
+                        lines.push_back(line);
+                        line = "";
+                    }
                     else {// for conditionals
                         if (peek() == "do") {
                             lines.push_back(match(KEYWORD));
