@@ -773,6 +773,19 @@ class String {
         }
         return pos;
     }
+    size_t rfindStr(char* s) {
+        size_t pos = -1;
+        size_t strLength = strlen(s);
+        for(size_t i = 0; i < this->size; i++) {
+            for(size_t j = i; j < this->size && j - i < strLength; j++) {
+                if(this->str[j] != s[j - i])
+                    goto cont;
+            }
+            pos=i;
+            cont:;
+        }
+        return pos;
+    }
 
     String substr(size_t pos, size_t len) {
         if (pos > this->size) {
