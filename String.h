@@ -763,7 +763,7 @@ class String {
     }
     size_t rfindString(String *str) {
         size_t pos = -1;
-        for(size_t i = 0; i < this->size; i++) {
+        for(size_t i = 0; i < this->size - str->size; i++) {
             for(size_t j = i; j < this->size && j - i < str->size; j++) {
                 if(this->str[j] != str->str[j - i])
                     goto cont;
@@ -776,7 +776,7 @@ class String {
     size_t rfindStr(char* s) {
         size_t pos = -1;
         size_t strLength = strlen(s);
-        for(size_t i = 0; i < this->size; i++) {
+        for(size_t i = 0; i < this->size - strLength; i++) {
             for(size_t j = i; j < this->size && j - i < strLength; j++) {
                 if(this->str[j] != s[j - i])
                     goto cont;
