@@ -90,6 +90,20 @@ class ArrayList {
         }
         this->length = arraySize;
     }
+    void assignArrayList(ArrayList* array) {
+        if (this->list == NULL) {
+            this->list = malloc(array->length * this->elementSize);
+            this->maxLength = array->length;
+        }
+        if (array->length > this->maxLength) {
+            this->list = realloc(this->list,this->elementSize * array->length);
+            this->maxLength = array->length;
+        }
+        for (size_t i = 0; i < array->length * this->elementSize; i++) {
+            ((char*)this->list)[i] = ((char*)array->list)[i];
+        }
+        this->length = array->length;
+    }
     void push_back(void* val) {
         if (this->list == NULL) {
             this->list = malloc(this->elementSize);
@@ -196,4 +210,5 @@ class ArrayList {
         }
         this->length = 0;
     }
+
 };
