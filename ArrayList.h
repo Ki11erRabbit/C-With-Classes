@@ -162,8 +162,8 @@ class ArrayList {
         void* tempPoint = NULL;
         tempPoint = malloc((this->length - pos) * this->elementSize);
 
-        memcpy(tempPoint,(char*)this->length + (pos * this->elementSize),this->elementSize * (this->length - pos));
-        free((char*)this->list + (pos * this->elementSize));
+        memcpy(tempPoint,(char*)this->list + ((pos +1 ) * this->elementSize),this->elementSize * (this->length - pos - 1));
+
         memcpy((char*)this->list + (pos * this->elementSize),tempPoint, this->elementSize * (this->length - pos));
         this->length--;
         free(tempPoint);
@@ -172,10 +172,10 @@ class ArrayList {
         void* tempPoint = NULL;
         tempPoint = malloc((this->length - len) * this->elementSize);
 
-        memcpy(tempPoint,(char*)this->length,this->elementSize * (this->length - len));
-        free((char*)this->list + (pos * this->elementSize));
-        memcpy((char*)this->list + (pos * this->elementSize),tempPoint,this->elementSize * (this->length - len));
-        this->length = this->length - (len - pos);
+        memcpy(tempPoint,(char*)this->list + (this->elementSize * (len + 1)),this->elementSize * (this->length - len -1));
+
+        memcpy((char*)this->list + (pos * this->elementSize),tempPoint,this->elementSize * (this->length - len -1));
+        this->length = this->length - (len - pos) - 1;
         free(tempPoint);
     }
     void swap(ArrayList *list) {
