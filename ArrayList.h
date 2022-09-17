@@ -48,6 +48,7 @@ class ArrayList {
         }
         if (n > this->maxLength) {
             this->list = realloc(this->list, n * this->elementSize);
+            this->maxLength = n;
         }
     }
     void shrink_to_fit() {
@@ -75,8 +76,19 @@ class ArrayList {
         return this->list;
     }
 
-    void assign() {
-
+    void assign(void* array, size_t arraySize) {
+        if (this->list == NULL) {
+            this->list = malloc(arraySize * this->elementSize);
+            this->maxLength = arraySize;
+        }
+        if (arraySize > this->maxLength) {
+            this->list = realloc(this->list,this->elementSize * arraySize);
+            this->maxLength = arraySize;
+        }
+        for (size_t i = 0; i < arraySize * this->elementSize; i++) {
+            ((char*)this->list)[i] = ((char*)array)[i];
+        }
+        this->length = arraySize;
     }
     void push_back(void* val) {
         if (this->list == NULL) {
@@ -87,11 +99,11 @@ class ArrayList {
             return;
         }
         else if (this->length == this->maxLength){
-            size_t newSize = (this->maxLength * this->elementSize) * 1.5;
+            size_t newSize = this->maxLength * 1.5;
             if (newSize <= 1)
-                newSize = (this->maxLength * this->elementSize) * 2;
+                newSize = this->maxLength * 2;
 
-            this->list = realloc(this->list,newSize);
+            this->list = realloc(this->list,newSize * this->elementSize);
             this->maxLength = newSize;
         }
         memcpy((char*)(this->list)+this->length*this->elementSize,val,this->elementSize);
@@ -106,11 +118,11 @@ class ArrayList {
             return;
         }
         else if (this->length == this->maxLength){
-            size_t newSize = (this->maxLength * this->elementSize) * 1.5;
+            size_t newSize = this->maxLength * 1.5;
             if (newSize <= 1)
-                newSize = (this->maxLength * this->elementSize) * 2;
+                newSize = this->maxLength * 2;
 
-            this->list = realloc(this->list,newSize);
+            this->list = realloc(this->list,newSize* this->elementSize);
             this->maxLength = newSize;
         }
         void* tempPoint = NULL;
@@ -131,17 +143,18 @@ class ArrayList {
             return;
         }
         else if (this->length == this->maxLength){
-            size_t newSize = (this->maxLength * this->elementSize) * 1.5;
+            size_t newSize = this->maxLength * 1.5;
             if (newSize <= 1)
-                newSize = (this->maxLength * this->elementSize) * 2;
+                newSize = this->maxLength * 2;
 
-            this->list = realloc(this->list,newSize);
+            this->list = realloc(this->list,newSize * this->elementSize);
             this->maxLength = newSize;
         }
         void* tempPoint = NULL;
         tempPoint = malloc((this->length - pos) * this->elementSize);
         memcpy(tempPoint, (char*)this->list + pos,(this->length - pos) * this->elementSize);
-        memcpy((char*)this->list + (pos * this->elementSize),tempPoint,(this->length - pos) * this->elementSize);
+        memcpy((char*)this->list + (pos * this->elementSize),val,this->elementSize);
+        memcpy((char*)this->list + ((pos + 1)* this->elementSize),tempPoint,(this->length - pos) * this->elementSize);
         this->length++;
         free(tempPoint);
     }
