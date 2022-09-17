@@ -183,7 +183,10 @@ private:
             string temp;
             codeBlock.push_back(className + " " + newObject.getName() +";");
             for (auto member : memberNeedInit) {
-                lines.insert(lines.begin() + 1,temp + newObject.getName() + "." + member.printWOTypePointer() + ";");
+                if (lines.size() > 0)
+                    lines.insert(lines.begin() + 1,temp + newObject.getName() + "." + member.printWOTypePointer() + ";");
+                else
+                    lines.insert(lines.begin(),temp + newObject.getName() + "." + member.printWOTypePointer() + ";");
             }
 
             for (auto method : methods) {
@@ -194,7 +197,7 @@ private:
                     lines.insert(lines.end() - 1,temp + newObject.getName() + "." + method.getName() + " = " + method.getFunctionName(className) + ";");
                 }
             }
-
+            lines.insert(lines.end(), "return " + newObject.getName() + ";");
             constructor.setBody(CodeBlock("",parameters,lines,oldBody.getCodeBlocks()));
         }
         if (key == 1) {
@@ -213,7 +216,10 @@ private:
             string temp;
             codeBlock.push_back(className + " " + newObject.getName() +";");
             for (auto member : memberNeedInit) {
-                lines.insert(lines.begin() + 1,temp + newObject.getName() + "->" + member.printWOTypePointer() + ";");
+                if (lines.size() > 0)
+                    lines.insert(lines.begin() + 1,temp + newObject.getName() + "->" + member.printWOTypePointer() + ";");
+                else
+                    lines.insert(lines.begin(),temp + newObject.getName() + "->" + member.printWOTypePointer() + ";");
             }
 
             for (auto method : methods) {

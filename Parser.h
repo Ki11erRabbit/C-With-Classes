@@ -370,6 +370,10 @@ private:
             list.push_back(parameter());
             return parameterList(list);
         }
+        else if (tokenType() == SPECIALCHAR && subTokenType() == OPEN) {
+            list.push_back(parameter());
+            return parameterList(list);
+        }
         else {
             return list;
         }
@@ -388,6 +392,10 @@ private:
             return parameterList(list);
         }
         else if (tokenType() == OPERATOR && subTokenType() == SIZEOF) {
+            list.push_back(parameter());
+            return parameterList(list);
+        }
+        else if (tokenType() == SPECIALCHAR && subTokenType() == OPEN) {
             list.push_back(parameter());
             return parameterList(list);
         }
