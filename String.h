@@ -4,6 +4,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include <ctype.h>
 
 
 
@@ -848,4 +849,22 @@ size_t getline(FILE* in,String* str, char* delim) {
         str->maxSize = str->size;
         return output;
     }
+}
+String toLowerCase(String *str) {
+    String lowercase = String__String();
+    lowercase.str = (char*)malloc(str->maxSize);
+    for (size_t i = 0; i < str->maxSize; i++) {
+        lowercase.str[i] = tolower(str->str[i]);
+    }
+
+    return lowercase;
+}
+String toUpperCase(String *str) {
+    String uppercase = String__String();
+    uppercase.str = (char*)malloc(str->maxSize);
+    for (size_t i = 0; i < str->maxSize; i++) {
+        uppercase.str[i] = toupper(str->str[i]);
+    }
+
+    return uppercase;
 }
