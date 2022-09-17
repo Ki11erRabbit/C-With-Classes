@@ -75,7 +75,7 @@ public:
             out << clasS.makeHeader();
         }
         for (auto function : functions) {
-            out << function.definitionForm(name);
+            out << function.definitionForm(name) << endl;
         }
 
         out << endl << "#endif" << endl;
