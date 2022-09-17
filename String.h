@@ -761,14 +761,20 @@ class String {
         char *start = strstr(this->str,s);
         return (size_t)(start - this->str);
     }
+    size_t findChar(char c) {
+        char *location = strchr(this->str,c);
+        return (size_t)(location - this->str);
+    }
+
     size_t rfindString(String *str) {
         size_t pos = -1;
-        for(size_t i = 0; i < this->size - str->size; i++) {
+        for(size_t i = this->size - str->size; i < this->size; i--) {
             for(size_t j = i; j < this->size && j - i < str->size; j++) {
                 if(this->str[j] != str->str[j - i])
                     goto cont;
             }
             pos=i;
+            break;
             cont:;
         }
         return pos;
@@ -776,15 +782,20 @@ class String {
     size_t rfindStr(char* s) {
         size_t pos = -1;
         size_t strLength = strlen(s);
-        for(size_t i = 0; i < this->size - strLength; i++) {
+        for(size_t i = this->size - strLength; i < this->size; i--) {
             for(size_t j = i; j < this->size && j - i < strLength; j++) {
                 if(this->str[j] != s[j - i])
                     goto cont;
             }
             pos=i;
+            break;
             cont:;
         }
         return pos;
+    }
+    size_t rfindChar(char c) {
+        char *location = strrchr(this->str,c);
+        return (size_t)(location - this->str);
     }
 
     String substr(size_t pos, size_t len) {
@@ -808,6 +819,15 @@ class String {
     }
     int compareStr(char *s) {
         return strcmp(this->str,s);
+    }
+    int compareSubstring(size_t pos, size_t len, String *str) {
+        return strncmp(this->str+pos,str->str,len+1);
+    }
+    int compareSubstrings(size_t pos, size_t len, String *str,size_t subpos, size_t sublen) {
+        char *temp = strndup(str->str+subpos,sublen+1);
+        int output = strncmp(this->str+pos,temp,len+1);
+        free(temp);
+        return output;
     }
 
     const char* toCStr() {
