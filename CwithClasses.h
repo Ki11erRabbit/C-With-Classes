@@ -62,6 +62,9 @@ public:
         for (auto include : includes) {
             out << include << endl;
         }
+        for (auto macro : macros) {
+            out << macro << endl;
+        }
         for (auto typeDef : typeDefs) {
             out << typeDef << endl;
         }

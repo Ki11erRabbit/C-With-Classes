@@ -271,6 +271,8 @@ private:
                     if (input.at(1) == '+')
                         return {2, {OPERATOR,NONE}};
                 case '-':
+                    if (input.at(1) == '-')
+                        return {2,{OPERATOR,NONE}};
                     if (input.at(1) == '=')
                         return {2, {OPERATOR,NONE}};
                     else if (input.at(1) == '>')
