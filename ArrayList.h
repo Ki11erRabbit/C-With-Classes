@@ -12,11 +12,11 @@ class ArrayList {
     size_t elementSize = 1;
     void* list;
 
-    ArrayList ArrayListList(size_t elemSize) {
+    ArrayList ArrayList(size_t elemSize) {
         ArrayList newList;
         newList.elementSize = elemSize;
     }
-    ArrayList newArrayListList(size_t elemSize) {
+    ArrayList newArrayList(size_t elemSize) {
         ArrayList *newList;
         newList->elementSize = elemSize;
     }

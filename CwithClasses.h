@@ -44,7 +44,7 @@ public:
         CwithClasses::name = name;
     }
 
-    const vector<Class> &getClasses() const {
+    vector<Class> &getClasses() {
         return classes;
     }
 
@@ -56,7 +56,7 @@ public:
                 classesFromFiles.push_back(clasS);
             }
         }
-        for (auto clasS : classes) {
+        for (auto& clasS : classes) {
             clasS.findInheritance(classesFromFiles);
         }
 

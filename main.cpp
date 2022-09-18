@@ -16,7 +16,7 @@ int main(int argc, char *argv[]) {
     std::cout << argc << " " << argv[1] << std::endl;
     vector<CwithClasses> files;
     for (int i = 1; i < argc; i++) {
-        ifstream in(argv[1]);
+        ifstream in(argv[i]);
         string accumulator;
         char currentChar;
         while (in.peek() != EOF) {
@@ -52,6 +52,12 @@ int main(int argc, char *argv[]) {
 
     for(size_t i = files.size()-1; i < files.size(); i--) {
         files.at(i).setupInheritance(files);
+    }
+
+    for (auto& file : files) {
+        for (auto& claSS : file.getClasses()) {
+            claSS.initializeConstructDeconstruct();
+        }
     }
 
     if (mkdir("output", 0777) == -1)

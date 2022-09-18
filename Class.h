@@ -128,7 +128,7 @@ private:
                 methods.erase(methods.begin()+i);
                 if (i > 0)
                     i--;
-                //injectVTable(defaultConstructor,0);
+                injectVTable(defaultConstructor,0);
                 dConstruct = true;
             }
             if (methods.at(i).getName().find(className) == 0) {
@@ -143,7 +143,7 @@ private:
                 methods.erase(methods.begin()+i);
                 if (i > 0)
                     i--;
-                //injectVTable(pointerConstructor,1);
+                injectVTable(pointerConstructor,1);
                 pConstruct = true;
             }
             if (methods.at(i).getName().find("new" + className) == 0) {
@@ -273,13 +273,16 @@ public:
         this->members = members;
         this->methods = methods;
         this->inheritanceList = inheritanceList;
+    }
+
+    void initializeConstructDeconstruct() {
         findAndSetConstructors();
         findAndSetDeconstructors();
-        for (size_t i = 0; i < altConstructors.size(); i++) {
-            injectVTable(altConstructors.at(i),0);
+        for (auto & altConstructor : altConstructors) {
+            injectVTable(altConstructor,0);
         }
-        for (size_t i = 0; i < altPointerConstructors.size(); i++) {
-            injectVTable(altPointerConstructors.at(i),1);
+        for (auto & altPointerConstructor : altPointerConstructors) {
+            injectVTable(altPointerConstructor,1);
         }
     }
 
@@ -305,15 +308,20 @@ public:
 
         for(const auto& method : parent.getMethods()) {
             if (find(this->methods.begin(),methods.end(), method) == methods.end()) {
-                methods.push_back(method);
+                methodsToAdd.push_back(method);
             }
         }
         for(const auto& member : parent.getMembers()) {
             if (find(this->members.begin(),members.end(), member) == members.end()) {
-                members.push_back(member);
+                membersToAdd.push_back(member);
             }
         }
-
+        for (auto method : methodsToAdd) {
+            methods.push_back(method);
+        }
+        for (auto member : membersToAdd) {
+            members.push_back(member);
+        }
     }
 
     void findInheritance(vector<Class> parents) {
