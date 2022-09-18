@@ -2,6 +2,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#define foreach(item,arrayList) \
+        for(size_t loopCheck = 1, count = 0, size = arrayList->length; loopCheck && count != size; loopCheck = !loopCheck, count++) \
+            for(item = (arrayList->list) + count * arrayList->elementSize; loopCheck; loopCheck = !loopCheck)
+
 class ArrayList {
     size_t length = 0;
     size_t maxLength = 0;

@@ -159,6 +159,8 @@ private:
                 return {5,{KEYWORD,CONTROL}};
             }
             else if (input.find("for") == 0) {
+                if (input.at(3) != '(' && input.at(3) != ' ')
+                    return {findEnding(),{IDENTIFIER,NONE}};
                 return {3, {KEYWORD,CONTROL}};
             }
             else if (input.find("do") == 0) {
@@ -206,7 +208,7 @@ private:
                 return {4, {IDENTIFIER,TYPE}};
             }
             else if (input.find("class") == 0) {
-                return {5, {KEYWORD,TYPE}};
+                return {5, {KEYWORD,CODE}};
             }
             else if (input.find("new") == 0) {
                 if (!std::isspace(input.at(4)))
@@ -266,6 +268,8 @@ private:
                 case '^':
                 case '%':
                 case '+':
+                    if (input.at(1) == '+')
+                        return {2, {OPERATOR,NONE}};
                 case '-':
                     if (input.at(1) == '=')
                         return {2, {OPERATOR,NONE}};

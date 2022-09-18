@@ -54,6 +54,17 @@ private:
         tokens.erase(tokens.begin());
         return value;
     }
+    string advanceTokenAlt() {
+        string value;
+        if (tokens.at(0).getSubType() == TYPE)
+            value = tokens.at(0).getValue() + " ";
+        else {
+            string value = tokens.at(0).getValue();
+        }
+
+        tokens.erase(tokens.begin());
+        return value;
+    }
 
     void throwError() {
         cout << endl << endl << "\t" << tokens.at(0) << endl;
@@ -194,14 +205,14 @@ private:
 
         expression += " ";
 
-        vector<string> tokenString = matchUntil(PREPROC,TYPE);
+        vector<string> tokenString = matchUntil(PREPROC,CODE);
 
         for (size_t i = 0; i < tokenString.size(); i++) {
             if (tokenString.at(i) == "\\") {
                 expression += tokenString.at(i) + "\n";
             }
             else {
-                expression += tokenString.at(i);
+                expression += tokenString.at(i) + " ";
             }
         }
         return expression;
