@@ -12,6 +12,8 @@
 
 #include "Parameter.h"
 #include "Method.h"
+#include <algorithm>
+//#include "CwithClasses.h"
 //#include "Method.h"
 
 using namespace std;
@@ -283,6 +285,49 @@ public:
 
     const string &getClassName() const {
         return className;
+    }
+
+    const vector<Parameter> &getMembers() const {
+        return members;
+    }
+
+    const vector<Method> &getMethods() const {
+        return methods;
+    }
+
+    const vector<string> &getInheritanceList() const {
+        return inheritanceList;
+    }
+
+    void initializeInheritance(Class parent) {
+        vector<Method> methodsToAdd;
+        vector<Parameter> membersToAdd;
+
+        for(const auto& method : parent.getMethods()) {
+            if (find(this->methods.begin(),methods.end(), method) == methods.end()) {
+                methods.push_back(method);
+            }
+        }
+        for(const auto& member : parent.getMembers()) {
+            if (find(this->members.begin(),members.end(), member) == members.end()) {
+                members.push_back(member);
+            }
+        }
+
+    }
+
+    void findInheritance(vector<Class> parents) {
+        vector<Method> methodsToAdd;
+        vector<Parameter> membersToAdd;
+
+        for (auto parentClass : inheritanceList) {
+            for (auto parent : parents) {
+                if (parentClass == parent.getClassName()) {
+                    initializeInheritance(parent);
+                }
+            }
+        }
+
     }
 
     string makeSource() {

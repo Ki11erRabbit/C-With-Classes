@@ -92,6 +92,10 @@ public:
         os << param.toString();
         return os;
     }
+    bool operator==(const Parameter& other) const
+    {
+        return (this->name == other.name) && (this->type == other.type);
+    }
 };
 
 

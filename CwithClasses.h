@@ -44,6 +44,24 @@ public:
         CwithClasses::name = name;
     }
 
+    const vector<Class> &getClasses() const {
+        return classes;
+    }
+
+
+    void setupInheritance(vector<CwithClasses> files) {
+        vector<Class> classesFromFiles;
+        for (auto file : files) {
+            for (auto clasS : file.getClasses()) {
+                classesFromFiles.push_back(clasS);
+            }
+        }
+        for (auto clasS : classes) {
+            clasS.findInheritance(classesFromFiles);
+        }
+
+    }
+
     string makeHeaderFile(){
         stringstream out;
         string headerName;

@@ -50,6 +50,10 @@ int main(int argc, char *argv[]) {
         in.close();
     }
 
+    for(size_t i = files.size()-1; i < files.size(); i--) {
+        files.at(i).setupInheritance(files);
+    }
+
     if (mkdir("output", 0777) == -1)
         cerr << "Error : " << strerror(errno) << endl;
     else

@@ -131,6 +131,18 @@ public:
 
         return out.str();
     }
+
+    Method(Method const &method) {
+        this->parameters = method.parameters;
+        this->methodName = method.methodName;
+        this->returnType = method.returnType;
+        this->body = method.body;
+    }
+
+    bool operator==(const Method& other) const
+    {
+        return this->methodName == other.methodName;
+    }
 };
 
 
