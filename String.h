@@ -8,7 +8,6 @@
 
 
 
-
 class String {
     char *str = NULL;
     size_t size;

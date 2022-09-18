@@ -27,6 +27,7 @@ private:
     vector<Method> altPointerConstructors;
     Method deconstructor;
     Method pointerDeconstructor;
+    vector<string> inheritanceList;
 
     string makeStruct() {
         stringstream out;
@@ -265,10 +266,11 @@ public:
     Class();
     /*Class(const string &className, const vector<Parameter> &members, vector<Method> methods)
     : className(className), members(members), methods(methods) {};*/
-    Class(const string &className, vector<Parameter> members, vector<Method> methods) {
+    Class(const string &className, vector<Parameter> members, vector<Method> methods,vector<string> inheritanceList) {
         this->className = className;
         this->members = members;
         this->methods = methods;
+        this->inheritanceList = inheritanceList;
         findAndSetConstructors();
         findAndSetDeconstructors();
         for (size_t i = 0; i < altConstructors.size(); i++) {

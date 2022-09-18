@@ -85,6 +85,7 @@ private:
                 case '}':
                 case ';':
                 case ',':
+                case ':':
                     return i;
                 case '\\':
                     if (input.at(0) == '\'' || input.at(0) == '\"')
