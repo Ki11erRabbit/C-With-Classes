@@ -376,27 +376,34 @@ public:
     void initializeInheritance(Class parent) {
         vector<Method> methodsToAdd;
 
-        includes.push_back(parent.getHeader());
+        if (find(includes.begin(),includes.end(),parent.getHeader()) == includes.end()) {
+            includes.push_back(parent.getHeader());
+        }
 
-        members.insert(members.begin(),Parameter(parent.getClassName(),"base"));
 
-        injectBaseConstructor(parent.defaultConstructor, parent.className);
-        injectBasePointerConstructor(parent.defaultConstructor,parent.className);
+        if (members.empty() || members.at(0).getType() != parent.className) {
+            members.insert(members.begin(),Parameter(parent.getClassName(),"base"));
 
-        for(const auto& method : parent.getMethods()) {
-            if (find(this->methods.begin(),methods.end(), method) == methods.end()) {
-                methodsToAdd.push_back(method);
+            injectBaseConstructor(parent.defaultConstructor, parent.className);
+            injectBasePointerConstructor(parent.defaultConstructor,parent.className);
+
+            for(const auto& method : parent.getMethods()) {
+                if (find(this->methods.begin(),methods.end(), method) == methods.end()) {
+                    methodsToAdd.push_back(method);
+                }
+            }
+            for (auto method : methodsToAdd) {
+                inheritedMethods.push_back({parent.getClassName(),method});
             }
         }
-        for (auto method : methodsToAdd) {
-            inheritedMethods.push_back({parent.getClassName(),method});
+
+        for (auto method : parent.inheritedMethods) {
+            inheritedMethods.push_back({method.first,method.second});
         }
 
     }
 
     void findInheritance(vector<Class> parents) {
-        vector<Method> methodsToAdd;
-        vector<Parameter> membersToAdd;
 
 
         for (auto parent : parents) {

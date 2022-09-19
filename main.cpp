@@ -56,9 +56,9 @@ int main(int argc, char *argv[]) {
     for(size_t i = files.size()-1; i < files.size(); i--) {
         files.at(i).setupInheritance(files);
     }
-    /*for(size_t i = 0; i < files.size(); i++) {
+    for(size_t i = 0; i < files.size(); i++) {
         files.at(i).setupInheritance(files);
-    }*/
+    }
 
     /*for (auto& file : files) {
         for (auto& claSS : file.getClasses()) {
