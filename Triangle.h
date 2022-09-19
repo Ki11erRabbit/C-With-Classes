@@ -1,4 +1,4 @@
 
-class Triangle: Shape {
+class Triangle extends Shape {
 
 };

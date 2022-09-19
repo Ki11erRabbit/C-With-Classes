@@ -219,6 +219,9 @@ private:
             else if (input.find("template") == 0) {
                 return {8, {KEYWORD,TYPE}};
             }
+            else if (input.find("extends") == 0) {
+                return {7, {KEYWORD,NONE}};
+            }
             else {
                 return {findEnding(),{IDENTIFIER,NONE}};
             }

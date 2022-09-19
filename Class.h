@@ -29,7 +29,7 @@ private:
     vector<Method> altPointerConstructors;
     Method deconstructor;
     Method pointerDeconstructor;
-    vector<string> inheritanceList;
+    string parentClass;
     vector<pair<string,Method>> inheritedMethods;
     string header;
     vector<string> includes;
@@ -124,7 +124,7 @@ private:
         vector<string> codeBlock;
         codeBlock.push_back("free(object);");
 
-        return Method("void",className + "Deconstructor",param,CodeBlock(codeBlock));
+        return Method("void", "_" + className + "Deconstructor",param,CodeBlock(codeBlock));
     }
     Method createPointerDeconstructor() {
         vector<Parameter> param;
@@ -133,7 +133,7 @@ private:
         vector<string> codeBlock;
         codeBlock.push_back("free(object);");
 
-        return Method("void","_" + className + "Deconstructor",param,CodeBlock(codeBlock));
+        return Method("void","_new" + className + "Deconstructor",param,CodeBlock(codeBlock));
     }
 
 
@@ -285,11 +285,11 @@ public:
     Class();
     /*Class(const string &className, const vector<Parameter> &members, vector<Method> methods)
     : className(className), members(members), methods(methods) {};*/
-    Class(const string &className, vector<Parameter> members, vector<Method> methods,vector<string> inheritanceList) {
+    Class(const string &className, vector<Parameter> members, vector<Method> methods,string parentClass) {
         this->className = className;
         this->members = members;
         this->methods = methods;
-        this->inheritanceList = inheritanceList;
+        this->parentClass = parentClass;
         initializeConstructDeconstruct();
     }
 
@@ -316,8 +316,8 @@ public:
         return methods;
     }
 
-    const vector<string> &getInheritanceList() const {
-        return inheritanceList;
+    const string &getParentClass() const {
+        return parentClass;
     }
 
     string getHeader() {
@@ -381,7 +381,7 @@ public:
         members.insert(members.begin(),Parameter(parent.getClassName(),"base"));
 
         injectBaseConstructor(parent.defaultConstructor, parent.className);
-        injectBasePointerConstructor(parent.pointerConstructor,parent.className);
+        injectBasePointerConstructor(parent.defaultConstructor,parent.className);
 
         for(const auto& method : parent.getMethods()) {
             if (find(this->methods.begin(),methods.end(), method) == methods.end()) {
@@ -398,13 +398,13 @@ public:
         vector<Method> methodsToAdd;
         vector<Parameter> membersToAdd;
 
-        for (auto parentClass : inheritanceList) {
-            for (auto parent : parents) {
-                if (parentClass == parent.getClassName()) {
-                    initializeInheritance(parent);
-                }
+
+        for (auto parent : parents) {
+            if (parentClass == parent.getClassName()) {
+                initializeInheritance(parent);
             }
         }
+
 
     }
 

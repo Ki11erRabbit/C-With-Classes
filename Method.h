@@ -71,7 +71,7 @@ public:
             out << "struct ";
         }
         out << returnType << " (*" << methodName << ")(";
-        out << "struct " << className << "*";
+        out << "void" << "*";
         if (!parameters.empty())
             out << ", ";
         for (size_t i = 0; i < parameters.size(); i++) {

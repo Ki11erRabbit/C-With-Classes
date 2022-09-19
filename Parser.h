@@ -1071,31 +1071,18 @@ private:
         }
     }
 
-    vector<string> inheritance() {
-        vector<string> classes;
-        while (tokenType() == IDENTIFIER || tokenType() != BRACE) {
-            if (tokenType() == IDENTIFIER) {
-                classes.push_back(match(IDENTIFIER));
-            }
-            else if (tokenType() == OPERATOR) {
-                match(OPERATOR);
-            }
-        }
-        return classes;
-    }
-
     Class classM() {
         string className;
         vector<Parameter> classMembers;
         vector<Method> classMethods;
-        vector<string> parentClasses;
+        string parentClass;
         if (tokenType() == KEYWORD && peek() == "class") {
             match(KEYWORD);
             className = match(IDENTIFIER);
             updateType(className);
-            if (tokenType() == OPERATOR) {
-                match(OPERATOR);
-                parentClasses = inheritance();
+            if (tokenType() == KEYWORD) {
+                match(KEYWORD);
+                parentClass = match(IDENTIFIER);
             }
             match(BRACE);
             while (tokenType() != BRACE && nextTokenType() != TERMINATOR) {
@@ -1133,7 +1120,7 @@ private:
             }
             match(BRACE);
             match(TERMINATOR);
-            return Class(className, classMembers, classMethods, parentClasses);
+            return Class(className, classMembers, classMethods, parentClass);
         }
         else {
             throwError();
