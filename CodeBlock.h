@@ -36,6 +36,8 @@ public:
 
             CodeBlock(std::vector<std::string> lines)
             : lines(lines) {}
+    CodeBlock(std::vector<Parameter> vars,std::vector<std::string> lines)
+            : variables(vars), lines(lines) {}
     void incrementCurrentBlock() {
         currentBlock += 1;
     }
@@ -65,6 +67,10 @@ public:
 
     void setVariables(const vector<Parameter> &variables) {
         CodeBlock::variables = variables;
+    }
+
+    void insertLine(string line, size_t index) {
+        lines.insert(lines.begin()+index, line);
     }
 
     std::string toString() {

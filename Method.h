@@ -46,6 +46,24 @@ public:
         this->body = body;
     }
 
+    void insertCodeLine(string line, size_t index) {
+        body.insertLine(line,index);
+    }
+
+    string callForm(string className) {
+        stringstream out;
+
+        out << className << "__" << methodName << "(";
+        for (size_t i = 0; i < parameters.size(); i++) {
+            out << parameters.at(i).getName();
+            if (i < parameters.size()-1)
+                out << ", ";
+        }
+        out << ")";
+
+        return out.str();
+    }
+
     string pointerForm(string className){
         stringstream out;
 

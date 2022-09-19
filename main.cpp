@@ -45,6 +45,9 @@ int main(int argc, char *argv[]) {
         cout << "Parsing Tokens" << endl;
         Parser parser(tokens);
         CwithClasses file = parser.startParsing();
+        for (auto& clasS : file.getClasses()) {
+            clasS.setHeader(argv[i]);
+        }
         file.setName(name);
         files.push_back(file);
         in.close();
@@ -53,12 +56,15 @@ int main(int argc, char *argv[]) {
     for(size_t i = files.size()-1; i < files.size(); i--) {
         files.at(i).setupInheritance(files);
     }
+    /*for(size_t i = 0; i < files.size(); i++) {
+        files.at(i).setupInheritance(files);
+    }*/
 
-    for (auto& file : files) {
+    /*for (auto& file : files) {
         for (auto& claSS : file.getClasses()) {
             claSS.initializeConstructDeconstruct();
         }
-    }
+    }*/
 
     if (mkdir("output", 0777) == -1)
         cerr << "Error : " << strerror(errno) << endl;

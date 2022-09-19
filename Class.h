@@ -30,6 +30,9 @@ private:
     Method deconstructor;
     Method pointerDeconstructor;
     vector<string> inheritanceList;
+    vector<pair<string,Method>> inheritedMethods;
+    string header;
+    vector<string> includes;
 
     string makeStruct() {
         stringstream out;
@@ -44,6 +47,9 @@ private:
         }
         for (auto method : methods) {
             out << method.pointerForm(className) << endl;
+        }
+        for (auto method : inheritedMethods) {
+            out << method.second.pointerForm(method.first) << endl;
         }
         out << "} " << className << ";" << endl;
 
@@ -63,7 +69,8 @@ private:
         }
         vector<string> codeBlock;
         string temp;
-        codeBlock.push_back(className + " newObject;");
+        codeBlock.push_back("}{");
+        Parameter tempObject(className,"newObject");
         for (auto member : memberNeedInit) {
             codeBlock.push_back(temp +"newObject" + "." + member.printWOTypePointer() + ";");
         }
@@ -76,7 +83,7 @@ private:
         }
         codeBlock.push_back("return newObject;");
 
-        return Method(className,className,CodeBlock(codeBlock));
+        return Method(className,className,CodeBlock({tempObject},codeBlock));
     }
 
     Method createPointerConstructor() {
@@ -92,7 +99,8 @@ private:
         }
         vector<string> codeBlock;
         string temp;
-        codeBlock.push_back(className + " *newObject;");
+        codeBlock.push_back("}{");
+        Parameter tempObject(className,"*","newObject");
         codeBlock.push_back(temp + "newObject = " + "(" + className + "*)malloc(sizeof(" + className + "));");
         for (auto member : memberNeedInit) {
             codeBlock.push_back(temp +"newObject" + "->" + member.printWOTypePointer() + ";");
@@ -106,7 +114,7 @@ private:
         }
         codeBlock.push_back("return newObject;");
 
-        return Method(className + "*","new" + className,CodeBlock(codeBlock));
+        return Method(className + "*","new" + className,CodeBlock({tempObject},codeBlock));
     }
 
     Method createDeconstructor() {
@@ -117,6 +125,15 @@ private:
         codeBlock.push_back("free(object);");
 
         return Method("void",className + "Deconstructor",param,CodeBlock(codeBlock));
+    }
+    Method createPointerDeconstructor() {
+        vector<Parameter> param;
+
+        param.push_back(Parameter(className,"*","object"));
+        vector<string> codeBlock;
+        codeBlock.push_back("free(object);");
+
+        return Method("void","_" + className + "Deconstructor",param,CodeBlock(codeBlock));
     }
 
 
@@ -262,7 +279,7 @@ private:
             deconstructor = createDeconstructor();
 
         if (!pDeconstruct)
-            pointerDeconstructor = createDeconstructor();
+            pointerDeconstructor = createPointerDeconstructor();
     }
 public:
     Class();
@@ -273,6 +290,7 @@ public:
         this->members = members;
         this->methods = methods;
         this->inheritanceList = inheritanceList;
+        initializeConstructDeconstruct();
     }
 
     void initializeConstructDeconstruct() {
@@ -302,26 +320,78 @@ public:
         return inheritanceList;
     }
 
+    string getHeader() {
+        return header;
+    }
+
+    void injectBaseConstructor(Method construct, string parentName) {
+        Parameter newObject("temp", "temp");
+        CodeBlock body = defaultConstructor.getBody();
+        for (auto var: body.getVariables()) {
+            if (var.getType() == className) {
+                newObject = var;
+            }
+        }
+        {
+            stringstream line;
+            line << newObject.getName() << "." << "base = " << construct.callForm(parentName) << ";";
+            defaultConstructor.insertCodeLine(line.str(), 1);
+        }
+        for (auto& constrct : altConstructors) {
+            for (auto var : construct.getBody().getVariables()) {
+                if (var.getType() == className) {
+                    newObject = var;
+                }
+            }
+            stringstream line;
+            line << newObject.getName() << "." << "base = " << construct.callForm(parentName) << ";";
+            constrct.insertCodeLine(line.str(),1);
+        }
+    }
+    void injectBasePointerConstructor(Method construct, string parentName) {
+        Parameter newObject("temp", "temp");
+        CodeBlock body = pointerConstructor.getBody();
+        for (auto var: body.getVariables()) {
+            if (var.getType() == className) {
+                newObject = var;
+            }
+        }
+        {
+            stringstream line;
+            line << newObject.getName() << "->" << "base = " << construct.callForm(parentName) << ";";
+            pointerConstructor.insertCodeLine(line.str(), 1);
+        }
+        for (auto& constrct : altPointerConstructors) {
+            for (auto var : construct.getBody().getVariables()) {
+                if (var.getType() == className) {
+                    newObject = var;
+                }
+            }
+            stringstream line;
+            line << newObject.getName() << "->" << "base = " << construct.callForm(parentName) << ";";
+            constrct.insertCodeLine(line.str(),1);
+        }
+    }
+
     void initializeInheritance(Class parent) {
         vector<Method> methodsToAdd;
-        vector<Parameter> membersToAdd;
+
+        includes.push_back(parent.getHeader());
+
+        members.insert(members.begin(),Parameter(parent.getClassName(),"base"));
+
+        injectBaseConstructor(parent.defaultConstructor, parent.className);
+        injectBasePointerConstructor(parent.pointerConstructor,parent.className);
 
         for(const auto& method : parent.getMethods()) {
             if (find(this->methods.begin(),methods.end(), method) == methods.end()) {
                 methodsToAdd.push_back(method);
             }
         }
-        for(const auto& member : parent.getMembers()) {
-            if (find(this->members.begin(),members.end(), member) == members.end()) {
-                membersToAdd.push_back(member);
-            }
-        }
         for (auto method : methodsToAdd) {
-            methods.push_back(method);
+            inheritedMethods.push_back({parent.getClassName(),method});
         }
-        for (auto member : membersToAdd) {
-            members.push_back(member);
-        }
+
     }
 
     void findInheritance(vector<Class> parents) {
@@ -363,7 +433,10 @@ public:
 
     string makeHeader() {
         stringstream out;
-
+        for (auto include : includes) {
+            out << "#include \"" << include << "\"" << endl;
+        }
+        out << endl;
         out << makeStruct() << endl << endl;
 
         out << defaultConstructor.definitionFormPlain(className) << endl << endl;
@@ -408,6 +481,10 @@ public:
     {
         os << clasS.toString();
         return os;
+    }
+
+    void setHeader(char *string) {
+        header = string;
     }
 };
 
