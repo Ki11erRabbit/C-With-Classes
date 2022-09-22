@@ -4,10 +4,10 @@
 #include "ListNode.h"
 
 
-#define foreach(item,structure) \
-        for (Iterator iterator = structure->begin(); !iterator->equals(structure->end()); iterator->next()) \
+#define foreach(item,dataStructure) \
+        for (Iterator iterator = dataStructure->begin(dataStructure); !iterator.equals(&iterator,dataStructure->end(dataStructure)); iterator.next(&iterator)) \
             for (char loopCheck = 1; loopCheck;)                    \
-            for (item = iterator.get(); loopCheck;loopCheck = !loopCheck)
+            for (item = iterator.get(&iterator); loopCheck;loopCheck = !loopCheck)
 
 class Iterator {
     void *pointer;
@@ -35,7 +35,7 @@ class Iterator {
         return this->pointer;
     }
     size_t getItemSize() {
-        return elementSize;
+        return this->elementSize;
     }
 
     void next() {
@@ -55,8 +55,8 @@ class Iterator {
         this->position--;
     }
 
-    int equals(Iterator *other) {
-        if (this->pointer == other->pointer) {
+    int equals(Iterator other) {
+        if (this->pointer == other.pointer) {
             return 1;
         }
         return 0;

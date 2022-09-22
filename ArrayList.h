@@ -17,7 +17,7 @@ class ArrayList {
         ArrayList newList;
         newList.elementSize = elemSize;
     }
-    ArrayList newArrayList(size_t elemSize) {
+    ArrayList *newArrayList(size_t elemSize) {
         ArrayList *newList;
         newList->elementSize = elemSize;
     }
@@ -30,10 +30,10 @@ class ArrayList {
     }
 
     Iterator begin() {
-        return Iterator(this->list,this->elementSize,0);
+        return Iterator__Iterator(this->list,this->elementSize,0);
     }
     Iterator end() {
-        return Iterator(((char*)this->list) + this->elementSize * (this->length -1),this->elementSize,this->length -1)
+        return Iterator__Iterator(((char*)this->list) + this->elementSize * (this->length),this->elementSize,this->length);
     }
 
     size_t size() {

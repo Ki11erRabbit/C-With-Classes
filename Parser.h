@@ -48,6 +48,9 @@ private:
     string peek() const {
         return tokens.at(0).getValue();
     }
+    string peekNext() const {
+        return tokens.at(1).getValue();
+    }
 
     string advanceToken() {
         string value = tokens.at(0).getValue();
@@ -452,6 +455,12 @@ private:
             }
             return type;
         }
+        else if (tokenType() == IDENTIFIER) {
+            type += match(IDENTIFIER);
+            if (tokenType() == OPERATOR)
+                type += match(OPERATOR);
+            return type;
+        }
         else {
             throwError();
         }
@@ -460,7 +469,7 @@ private:
     vector<Parameter> variableDeclaration() {
         string varType,varName, pointer, contents;
         vector<Parameter> varList;
-        if (tokenType() == KEYWORD) {
+        if (tokenType() == KEYWORD || (tokenType() == IDENTIFIER && (nextTokenType() != OPERATOR || peekNext() == "*"))) {
             varType = type();
             if (tokenType() == OPERATOR) {//for pointers
                 pointer = match(OPERATOR);
@@ -582,7 +591,7 @@ private:
 
     vector<vector<Parameter>> variableDeclarationList() {
         vector<vector<Parameter>> list;
-        if (tokenType() == KEYWORD && subTokenType() == TYPE && isMember()) {
+        if (tokenType() == KEYWORD && subTokenType() == TYPE && isMember() || (tokenType() == IDENTIFIER && (nextTokenType() != OPERATOR || peekNext() == "*"))) {
             list.push_back(variableDeclaration());
             return variableDeclarationList(list);
         }
@@ -591,7 +600,7 @@ private:
         }
     }
     vector<vector<Parameter>> variableDeclarationList(vector<vector<Parameter>> list) {
-        if (tokenType() == KEYWORD && subTokenType() == TYPE && isMember()) {
+        if (tokenType() == KEYWORD && subTokenType() == TYPE && isMember() || (tokenType() == IDENTIFIER && (nextTokenType() != OPERATOR || peekNext() == "*"))) {
             list.push_back(variableDeclaration());
             return variableDeclarationList(list);
         }
@@ -707,9 +716,15 @@ private:
 
     bool isMethod() {
         size_t i = 0;
-        while (tokens.at(i).getSubType() == TYPE) {
+        if (tokenType() == KEYWORD) {
+            while (tokens.at(i).getSubType() == TYPE) {
+                i++;
+            }
+        }
+        else if (tokenType() == IDENTIFIER) {
             i++;
         }
+
         if (tokens.at(i).getType() == OPERATOR) {//pointer
             i++;
         }
@@ -745,7 +760,12 @@ private:
         if (tokens.empty())
             return false;
         size_t i = 0;
-        while (tokens.at(i).getSubType() == TYPE) {
+        if (tokenType() == KEYWORD) {
+            while (tokens.at(i).getSubType() == TYPE) {
+                i++;
+            }
+        }
+        else if (tokenType() == IDENTIFIER) {
             i++;
         }
         if (tokens.at(i).getType() == OPERATOR) {//pointer
@@ -991,7 +1011,7 @@ private:
     Method method() {
         string returnType, methodName;
         vector<Parameter> parameters;
-        if (tokenType() == KEYWORD) {
+        if (tokenType() == KEYWORD || tokenType() == IDENTIFIER) {
             returnType = type();
             if (peek() == "*") {
                 returnType += match(OPERATOR);
@@ -1013,7 +1033,7 @@ private:
 
     vector<Method> methodList() {
         vector<Method> list;
-        if (tokenType() == KEYWORD) {
+        if (tokenType() == KEYWORD || tokenType() == IDENTIFIER) {
             list.push_back(method());
             return methodList(list);
         }
@@ -1022,7 +1042,7 @@ private:
         }
     }
     vector<Method> methodList(vector<Method> list) {
-        if (tokenType() == KEYWORD) {
+        if (tokenType() == KEYWORD || tokenType() == IDENTIFIER) {
             list.push_back(method());
             return methodList(list);
         }
