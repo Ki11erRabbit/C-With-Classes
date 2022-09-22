@@ -2,7 +2,7 @@
 #include <stdlib.h>
 #include "stdio.h"
 
-class TreeNode /*implements Node*/ {
+class TreeNode: Node {
     size_t numChildren;
     TreeNode **children;
 

@@ -1080,8 +1080,8 @@ private:
             match(KEYWORD);
             className = match(IDENTIFIER);
             updateType(className);
-            if (tokenType() == KEYWORD) {
-                match(KEYWORD);
+            if (tokenType() == OPERATOR) {
+                match(OPERATOR);
                 parentClass = match(IDENTIFIER);
             }
             match(BRACE);

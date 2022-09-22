@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
+#include "Iterator.h"
 
 #define foreach(item,arrayList) \
         for(size_t loopCheck = 1, count = 0, size = arrayList->length; loopCheck && count != size; loopCheck = !loopCheck, count++) \
@@ -26,6 +27,13 @@ class ArrayList {
     void _newArrayList(ArrayList* list) {
         free(list->list);
         free(list);
+    }
+
+    Iterator begin() {
+        return Iterator(this->list,this->elementSize,0);
+    }
+    Iterator end() {
+        return Iterator(((char*)this->list) + this->elementSize * (this->length -1),this->elementSize,this->length -1)
     }
 
     size_t size() {

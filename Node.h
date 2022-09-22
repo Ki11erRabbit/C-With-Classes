@@ -31,4 +31,8 @@ class Node {
         free(node->data);
         free(node);
     }
+
+    void* getData() {
+        return data;
+    }
 };

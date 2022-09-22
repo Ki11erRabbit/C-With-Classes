@@ -1,4 +1,4 @@
-
-class Triangle extends Shape {
+#include "Shape.h"
+class Triangle: Shape {
 
 };
