@@ -23,17 +23,19 @@ class ArrayList {
     }
     void _ArrayList(ArrayList* list) {
         free(list->list);
+        list->list = NULL;
     }
     void _newArrayList(ArrayList* list) {
         free(list->list);
         free(list);
+        list = NULL;
     }
 
     Iterator begin() {
-        return Iterator__Iterator(this->list,this->elementSize,0);
+        return Iterator__Iterator(this->list,this->elementSize,0,0);
     }
     Iterator end() {
-        return Iterator__Iterator(((char*)this->list) + this->elementSize * (this->length),this->elementSize,this->length);
+        return Iterator__Iterator(((char*)this->list) + this->elementSize * (this->length),this->elementSize,this->length,0);
     }
 
     size_t size() {

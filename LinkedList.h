@@ -1,4 +1,5 @@
 #include "ListNode.h"
+#include "Iterator.h"
 #include <stdio.h>
 
 
@@ -7,6 +8,44 @@ class LinkedList {
     ListNode *tail;
     size_t numNodes = 0;
     size_t elemSize = 1;
+
+    LinkedList LinkedList(size_t elemSize) {
+        LinkedList newList;
+        newList.elemSize = elemSize;
+        return newList;
+    }
+    LinkedList *newLinkedList(size_t elemSize) {
+        LinkedList *newList;
+        newList->elemSize = elemSize;
+
+        return newList;
+    }
+    void _LinkedList(LinkedList *list) {
+        size_t maxSize = list->numNodes;
+        while (list->numNodes < maxSize) {
+            list->pop_back(list);
+        }
+        list->head = NULL;
+        list->tail = NULL;
+    }
+    void _newLinkedList(LinkedList *list) {
+        size_t maxSize = list->numNodes;
+        while (list->numNodes < maxSize) {
+            list->pop_back(list);
+        }
+        list->head = NULL;
+        list->tail = NULL;
+        free(list);
+        list = NULL;
+    }
+
+
+    Iterator begin() {
+        return Iterator__Iterator(head,this->elemSize,0,1);
+    }
+    Iterator end() {
+        return Iterator__Iterator(tail,this->elemSize,this->numNodes,1);
+    }
 
     int empty() {
         if (this->head == NULL && this->tail == NULL) {

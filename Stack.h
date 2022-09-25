@@ -7,6 +7,31 @@ class Stack {
     size_t numNodes = 0;
     size_t elementSize = 1;
 
+    Stack Stack(size_t elemSize) {
+        Stack newStack;
+        newStack.elementSize = elemSize;
+
+        return newStack;
+    }
+    Stack *newStack(size_t elemSize) {
+        Stack *newStack;
+        newStack->elementSize = elemSize;
+
+        return newStack;
+    }
+    void _Stack(Stack *stack) {
+        while (stack->stackTop != NULL) {
+            stack->pop(stack);
+        }
+    }
+    void _newStack(Stack *stack) {
+        while (stack->stackTop != NULL) {
+            stack->pop(stack);
+        }
+        free(stack);
+        stack = NULL;
+    }
+
     int empty() {
         if (this->stackTop == NULL) {
             return 1;
