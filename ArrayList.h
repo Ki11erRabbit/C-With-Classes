@@ -206,7 +206,7 @@ class ArrayList {
     }
     void swap(ArrayList *list) {
         if (this->elementSize != list->elementSize) {
-            fprintf(stderr, "%s", "Error: different type in vector");
+            fprintf(stderr, "%s", "Error: different type in arraylist");
             return;
         }
 

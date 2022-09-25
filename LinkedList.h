@@ -9,20 +9,20 @@ class LinkedList {
     size_t elemSize = 1;
 
     int empty() {
-        if (head == NULL && tail == NULL) {
+        if (this->head == NULL && this->tail == NULL) {
             return 1;
         }
         return 0;
     }
     size_t size() {
-        return numNodes;
+        return this->numNodes;
     }
 
     void *front() {
-        return head->getData();
+        return this->head->getData();
     }
     void *back() {
-        return tail->getData();
+        return this->tail->getData();
     }
 
     void assign(size_t n, void *val) {

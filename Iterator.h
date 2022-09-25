@@ -55,6 +55,21 @@ class Iterator {
         this->position--;
     }
 
+    void add(size_t pos) {
+        size_t index = pos;
+        while (index <= pos) {
+            this->next(this);
+            index--;
+        }
+    }
+    void subtract(size_t pos) {
+        size_t index = pos;
+        while (index <= pos) {
+            this->previous(this);
+            index--;
+        }
+    }
+
     int equals(Iterator other) {
         if (this->pointer == other.pointer) {
             return 1;

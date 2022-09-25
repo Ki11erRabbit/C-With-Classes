@@ -25,11 +25,11 @@ class ListNode:Node {
         return node;
     }
 
-    ListNode getNext() {
-        return *this->nextNode;
+    ListNode *getNext() {
+        return this->nextNode;
     }
-    ListNode getPrevious() {
-        return *this->previousNode;
+    ListNode *getPrevious() {
+        return this->previousNode;
     }
     void setNext(ListNode *node) {
         this->nextNode = node;
