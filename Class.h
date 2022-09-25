@@ -23,6 +23,7 @@ private:
     string className;
     vector<Parameter> members;
     vector<Method> methods;
+    vector<pair<string,vector<Method>>> overloadedMethods;
     Method defaultConstructor;
     Method pointerConstructor;
     vector<Method> altConstructors;
@@ -47,6 +48,9 @@ private:
         }
         for (auto method : methods) {
             out << method.pointerForm(className) << endl;
+        }
+        for (auto overLoad : overloadedMethods) {
+            out << overLoad.second.at(0).pointerForm(className,overLoad.first) << endl;
         }
         for (auto method : inheritedMethods) {
             out << method.second.pointerForm(method.first) << endl;
@@ -204,9 +208,9 @@ private:
             codeBlock.push_back(className + " " + newObject.getName() +";");
             for (auto member : memberNeedInit) {
                 if (lines.size() > 0)
-                    lines.insert(lines.begin() + 1,temp + newObject.getName() + "." + member.printWOTypePointer() + ";");
+                    lines.insert(lines.begin() + 1,newObject.getName() + "." + member.printWOTypePointer() + ";");
                 else
-                    lines.insert(lines.begin(),temp + newObject.getName() + "." + member.printWOTypePointer() + ";");
+                    lines.insert(lines.begin(),newObject.getName() + "." + member.printWOTypePointer() + ";");
             }
 
             for (auto method : methods) {
@@ -214,7 +218,16 @@ private:
                     continue;
                 }
                 else {
-                    lines.insert(lines.end() - 1,temp + newObject.getName() + "." + method.getName() + " = " + method.getFunctionName(className) + ";");
+                    lines.insert(lines.end() - 1, newObject.getName() + "." + method.getName() + " = " + method.getFunctionName(className) + ";");
+                }
+            }
+
+            for (auto overload : overloadedMethods) {
+                int i = 0;
+                for (auto method : overload.second) {
+                    lines.insert(lines.end() -1,"if (overloadCheck == " + to_string(i) + ")");
+                    lines.insert(lines.end()-1, newObject.getName()+ "." + overload.first + " = " + method.getFunctionName(className) + ";");
+                    i++;
                 }
             }
             lines.insert(lines.end(), "return " + newObject.getName() + ";");
@@ -251,6 +264,14 @@ private:
                                                   method.getFunctionName(className) + ";");
                 }
             }
+            for (auto overload : overloadedMethods) {
+                int i = 0;
+                for (auto method : overload.second) {
+                    lines.insert(lines.end() -1,"if (overloadCheck == " + to_string(i) + ")");
+                    lines.insert(lines.end()-1, newObject.getName()+ "->" + overload.first + " = " + method.getFunctionName(className) + ";");
+                    i++;
+                }
+            }
 
             constructor.setBody(CodeBlock("",parameters,lines,oldBody.getCodeBlocks()));
         }
@@ -281,6 +302,42 @@ private:
         if (!pDeconstruct)
             pointerDeconstructor = createPointerDeconstructor();
     }
+
+    void findOverloadedMethods() {
+
+        for (size_t i = 0; i < methods.size(); i++) {
+            string methodName = methods.at(i).getName();
+            vector<Method> overMethods;
+            overMethods.push_back(methods.at(i));
+            for (size_t j = i+1; j < methods.size(); j++) {
+                if (methodName == methods.at(j).getName()) {
+                    overMethods.push_back(methods.at(j));
+                    methods.erase(methods.begin()+j);
+                    j--;
+                }
+            }
+            if (overMethods.size() > 1) {
+                methods.erase(methods.begin()+i);
+                i--;
+                for (size_t x = 0; x < overMethods.size(); x++) {
+                    overMethods.at(x).setMethodName(overMethods.at(x).getName() + to_string(x));
+                }
+                overloadedMethods.push_back({methodName,overMethods});
+            }
+        }
+    }
+    void setupOverload() {
+        Parameter overloadCheck("char","overloadCheck");
+        defaultConstructor.insertParameter(overloadCheck);
+        pointerConstructor.insertParameter(overloadCheck);
+        for (auto& construct : altConstructors) {
+            construct.insertParameter(overloadCheck);
+        }
+        for (auto& construct : altPointerConstructors) {
+            construct.insertParameter(overloadCheck);
+        }
+    }
+
 public:
     Class();
     /*Class(const string &className, const vector<Parameter> &members, vector<Method> methods)
@@ -290,7 +347,9 @@ public:
         this->members = members;
         this->methods = methods;
         this->parentClass = parentClass;
+        findOverloadedMethods();
         initializeConstructDeconstruct();
+        setupOverload();
     }
 
     void initializeConstructDeconstruct() {
@@ -434,6 +493,10 @@ public:
         for (auto method : methods) {
             out << method.functionForm(className) << endl << endl;
         }
+        for (auto overload : overloadedMethods) {
+            for (auto method : overload.second)
+                out << method.functionForm(className) << endl;
+        }
 
         return out.str();
     }
@@ -459,6 +522,10 @@ public:
 
         for (auto method : methods) {
             out << method.definitionForm(className) << endl;
+        }
+        for (auto overload : overloadedMethods) {
+            for (auto method : overload.second)
+                out << method.definitionForm(className) << endl;
         }
 
         return out.str();

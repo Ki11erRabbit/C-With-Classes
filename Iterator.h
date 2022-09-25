@@ -46,11 +46,11 @@ class Iterator {
         this->pointer = ((char*)this->pointer) - this->elementSize;
         this->position--;
     }
-    void nextListNode() {
+    void next() {
         this->pointer = ((ListNode*)this->pointer)->nextNode;
         this->position++;
     }
-    void previousNode() {
+    void previous() {
         this->pointer = ((ListNode*)this->pointer)->previousNode;
         this->position--;
     }

@@ -46,6 +46,17 @@ public:
         this->body = body;
     }
 
+    const string &getMethodName() const {
+        return methodName;
+    }
+
+    void setMethodName(const string &methodName) {
+        Method::methodName = methodName;
+    }
+    void insertParameter(Parameter param) {
+        parameters.push_back(param);
+    }
+
     void insertCodeLine(string line, size_t index) {
         body.insertLine(line,index);
     }
@@ -71,6 +82,30 @@ public:
             out << "struct ";
         }
         out << returnType << " (*" << methodName << ")(";
+        out << "void" << "*";
+        if (!parameters.empty())
+            out << ", ";
+        for (size_t i = 0; i < parameters.size(); i++) {
+            string param;
+            if (parameters.at(i).getType() == className) {
+                param = "struct ";
+            }
+            param += parameters.at(i).getType() + parameters.at(i).getPointer();
+            out << param;
+            if (i < parameters.size()-1)
+                out << ", ";
+        }
+        out << ");";
+
+        return out.str();
+    }
+    string pointerForm(string className, string overloadName){
+        stringstream out;
+
+        if (returnType == className) {
+            out << "struct ";
+        }
+        out << returnType << " (*" << overloadName << ")(";
         out << "void" << "*";
         if (!parameters.empty())
             out << ", ";
