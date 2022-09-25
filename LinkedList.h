@@ -86,6 +86,22 @@ class LinkedList {
         numNodes--;
     }
     void swap(LinkedList *other) {
+        if (this->elemSize != other->elemSize) {
+            fprintf(stderr, "%s", "Error: different type in stack");
+            return;
+        }
+
+        size_t tempCount = this->numNodes;
+        ListNode *tempHead = this->head;
+        ListNode *tempTail = this->tail;
+
+        this->head = other->head;
+        this->tail = other->tail;
+        this->numNodes = other->numNodes;
+
+        other->head = tempHead;
+        other->tail = tempTail;
+        other->numNodes = tempCount;
 
     }
     void clear() {

@@ -204,17 +204,24 @@ class ArrayList {
         this->length = this->length - (len - pos) - 1;
         free(tempPoint);
     }
-    void swap(ArrayList *list) {
-        if (this->elementSize != list->elementSize) {
+    void swap(ArrayList *other) {
+        if (this->elementSize != other->elementSize) {
             fprintf(stderr, "%s", "Error: different type in arraylist");
             return;
         }
 
-        free(this->list);
-        this->list = NULL;
-        this->list = list->list;
-        this->length = list->length;
-        this->maxLength = list->maxLength;
+        size_t tempLength = this->length;
+        size_t tempMaxLength = this->maxLength;
+        void *tempList = this->list;
+
+        this->list = other->list;
+        this->length = other->length;
+        this->maxLength = other->maxLength;
+
+        other->list = tempList;
+        other->length = tempLength;
+        other->maxLength = tempMaxLength;
+
     }
     void clear() {
         for(size_t i = 0; i < this->length; i++) {

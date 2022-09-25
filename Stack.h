@@ -30,23 +30,19 @@ class Stack {
         this->stackTop = newTop;
         numNodes--;
     }
-    void swap(Stack *stack) {
-        if (this->elementSize != stack->elementSize) {
+    void swap(Stack *other) {
+        if (this->elementSize != other->elementSize) {
             fprintf(stderr, "%s", "Error: different type in stack");
             return;
         }
-        while (this->numNodes > 0) {
-            this->pop(this);
-        }
-        StackNode *sourceNodes = (StackNode*)malloc(sizeof(StackNode) * stack->numNodes);
+        size_t tempNodeCount = this->numNodes;
+        StackNode *tempTop = this->stackTop;
 
-        StackNode *pointer = NULL;
-        pointer = stack->stackTop;
-        while (pointer != NULL) {
-            sourceNodes = pointer;
-            sourceNodes++;
-            pointer = pointer->nextNode;
-        }
+        this->stackTop = other->stackTop;
+        this->numNodes = other->numNodes;
+
+        other->stackTop = tempTop;
+        other->numNodes = tempNodeCount;
 
     }
 };
