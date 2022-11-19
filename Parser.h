@@ -1051,6 +1051,65 @@ private:
         }
     }
 
+    Method privateMethod() {
+        string returnType, methodName;
+        vector<Parameter> parameters;
+        if (tokenType() == KEYWORD && peek() == "private") {
+            match(KEYWORD);//matches with PRIVATE keyword
+            if (tokenType() == KEYWORD || tokenType() == IDENTIFIER) {
+                returnType = type();
+                if (peek() == "*") {
+                    returnType += match(OPERATOR);
+                }
+                methodName = match(IDENTIFIER);
+                match(SPECIALCHAR);
+
+                parameters = methodParameterList();
+
+                match(SPECIALCHAR);
+                CodeBlock body = codeBlock();
+
+                return Method(returnType, methodName, parameters, body);
+            }
+            else {
+                throwError();
+            }
+        }
+        else {
+            throwError();
+        }
+    }
+
+    vector<Method> privateMethodList() {
+        vector<Method> list;
+        if (tokenType() == KEYWORD && peek() == "private") {
+            if (tokenType() == KEYWORD || tokenType() == IDENTIFIER) {
+                list.push_back(privateMethod());
+                return privateMethodList(list);
+            }
+            else {
+                return list;
+            }
+        }
+        else {
+            return list;
+        }
+    }
+    vector<Method> privateMethodList(vector<Method> list) {
+        if (tokenType() == KEYWORD && peek() == "private") {
+            if (tokenType() == KEYWORD || tokenType() == IDENTIFIER) {
+                list.push_back(privateMethod());
+                return privateMethodList(list);
+            }
+            else {
+                return list;
+            }
+        }
+        else {
+            return list;
+        }
+    }
+
     Function function() {
         string returnType, functionName;
         vector<Parameter> parameters;
@@ -1095,6 +1154,7 @@ private:
         string className;
         vector<Parameter> classMembers;
         vector<Method> classMethods;
+        vector<Method> classPrivateMethods;
         string parentClass;
         if (tokenType() == KEYWORD && peek() == "class") {
             match(KEYWORD);
@@ -1128,6 +1188,12 @@ private:
                         classMethods.push_back(method);
                     }
 
+                }
+                else if (peek() == "private") {
+                    vector<Method> tempMethod = privateMethodList();
+                    for (auto method : tempMethod) {
+                        classPrivateMethods.push_back(method);
+                    }
                 }
                 else {
                     if (tokenType() == COMMENT) {

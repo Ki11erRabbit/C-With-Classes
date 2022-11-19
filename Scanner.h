@@ -216,6 +216,9 @@ private:
                     return {findEnding(),{IDENTIFIER,NONE}};
                 return {3, {KEYWORD,TYPE}};
             }
+            else if (input.find("private") == 0) {
+                return {7,{KEYWORD,CODE}};
+            }
             else if (input.find("template") == 0) {
                 return {8, {KEYWORD,TYPE}};
             }

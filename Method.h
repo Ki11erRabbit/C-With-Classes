@@ -154,6 +154,23 @@ public:
         return out.str();
     }
 
+    string functionFormNamespaceless(string className) {
+        stringstream out;
+
+        out << returnType << " " << methodName << "(";
+        out << className << "* " << "this";
+        if (!parameters.empty())
+            out << ", ";
+        for (size_t i = 0; i < parameters.size(); i++) {
+            out << parameters.at(i).getType() << " " << parameters.at(i).getPointer()  << parameters.at(i).getName();
+            if (i < parameters.size()-1)
+                out << ", ";
+        }
+        out << ") " << body;
+
+        return out.str();
+    }
+
     string definitionForm(string className) {
         stringstream out;
 

@@ -34,6 +34,7 @@ private:
     vector<pair<string,Method>> inheritedMethods;
     string header;
     vector<string> includes;
+    vector<Method> privateMethods;
 
     string makeStruct() {
         stringstream out;
@@ -351,6 +352,16 @@ public:
         initializeConstructDeconstruct();
         setupOverload();
     }
+    Class(const string &className, vector<Parameter> members, vector<Method> methods,string parentClass,vector<Method> privateMethods) {
+        this->className = className;
+        this->members = members;
+        this->methods = methods;
+        this->parentClass = parentClass;
+        this->privateMethods = privateMethods;
+        findOverloadedMethods();
+        initializeConstructDeconstruct();
+        setupOverload();
+    }
 
     void initializeConstructDeconstruct() {
         findAndSetConstructors();
@@ -489,6 +500,10 @@ public:
 
         out << deconstructor.functionFormPlain(className) << endl << endl;
         out << pointerDeconstructor.functionFormPlain(className) << endl << endl;
+
+        for (auto method : privateMethods) {
+            out << "static " << method.functionFormNamespaceless(className) << endl << endl;
+        }
 
         for (auto method : methods) {
             out << method.functionForm(className) << endl << endl;
