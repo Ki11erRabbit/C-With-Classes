@@ -16,6 +16,7 @@ private:
     std::string name;
     std::string pointer;
     std::string storedValue;
+    bool functionPointer = false;
 
 public:
 
@@ -26,6 +27,8 @@ public:
             : type(type), pointer(pointer), name(name) {};
     Parameter (std::string type, std::string pointer, std::string name, std::string storedValue)
             : type(type), pointer(pointer), name(name), storedValue(storedValue) {};
+    Parameter (std::string type, std::string pointer, std::string name, std::string storedValue, bool funcPointer)
+            : type(type), pointer(pointer), name(name), storedValue(storedValue), functionPointer(funcPointer) {};
 
 
     std::string getType() {

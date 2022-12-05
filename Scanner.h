@@ -106,7 +106,10 @@ private:
                 return {5, {KEYWORD,TYPE}};
             }
             else if (input.find("int") == 0) {
-                return {3, {KEYWORD,TYPE}};
+                if (std::isspace(input.at(4)))
+                    return {3, {KEYWORD,TYPE}};
+                else
+                    return {findEnding(),{IDENTIFIER,NONE}};
             }
             else if (input.find("long") == 0) {
                 return {4,{KEYWORD,TYPE}};

@@ -274,6 +274,9 @@ private:
     string expression() {
         string statement;
 
+        if (tokenType() == COMMENT) {
+            statement = match(COMMENT);
+        }
         if (tokenType() == SPECIALCHAR && subTokenType() == OPEN) {//type casts or nested expressions
             statement += match(SPECIALCHAR);
             if (tokenType() == KEYWORD) {//typecast
@@ -475,6 +478,21 @@ private:
                 pointer = match(OPERATOR);
                 if (tokenType() == OPERATOR)//for pointer of pointers
                     pointer += match(OPERATOR);
+            }
+            if (tokenType() == SPECIALCHAR) {// for function pointers
+                match(SPECIALCHAR);
+                match(OPERATOR);
+                varName += match(IDENTIFIER);
+                match(SPECIALCHAR);
+
+                contents = match(SPECIALCHAR);
+                for (auto token : matchUntil(SPECIALCHAR)) {
+                    contents += token;
+                }
+                contents += match(SPECIALCHAR);
+                varList.push_back(Parameter(varType,pointer,varName,contents,true));
+                match(SPECIALCHAR);
+                return varList;
             }
             if (tokenType() == IDENTIFIER) {
                 varName = match(IDENTIFIER);
@@ -746,6 +764,30 @@ private:
         if (tokens.at(i).getType() == OPERATOR) {//pointer
             i++;
         }
+        if (tokens.at(i).getType() == SPECIALCHAR) {//function pointer
+            i++;
+            bool good = false;
+            if (tokens.at(i).getType() == OPERATOR) {
+                i++;
+                if (tokens.at(i).getType() == IDENTIFIER) {
+                    i++;
+                    if (tokens.at(i).getType() == SPECIALCHAR) {
+                        i++;
+                        if (tokens.at(i).getType() == SPECIALCHAR) {
+                            i++;
+                            for (i = i; tokens.at(i).getType() != SPECIALCHAR; i++) {
+
+                            }
+                            if (tokens.at(i).getType() == SPECIALCHAR) {
+                                i++;
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+            return false;
+        }
         if (tokens.at(i).getType() == IDENTIFIER) {
             if (tokens.at(i+1).getType() == OPERATOR || tokens.at(i+1).getType() == TERMINATOR)
                 return true;
@@ -792,6 +834,13 @@ private:
             }
 
             parameterName = match(IDENTIFIER);
+            if (tokenType() == SPECIALCHAR && subTokenType() != CLOSE) {//function pointers
+                parameterName += match(SPECIALCHAR);
+                for (auto token : matchUntil(SPECIALCHAR)) {
+                    parameterName += " " + token;
+                }
+                parameterName += match(SPECIALCHAR);
+            }
             return Parameter(parameterType, parameterPointer,parameterName);
         }
         else if (tokenType() == OPERATOR && subTokenType() == TYPE) {//for variable length arguments
@@ -995,6 +1044,9 @@ private:
                     lines.push_back(line);
                     line = "";
                 }
+                else if (tokenType() != COMMENT) {
+                    lines.push_back(match(COMMENT));
+                }
                 if (tokens.empty()) {
                     break;
                 }
@@ -1033,7 +1085,7 @@ private:
 
     vector<Method> methodList() {
         vector<Method> list;
-        if (tokenType() == KEYWORD || tokenType() == IDENTIFIER) {
+        if ((tokenType() == KEYWORD || tokenType() == IDENTIFIER) && peek() != "private") {
             list.push_back(method());
             return methodList(list);
         }
@@ -1042,7 +1094,7 @@ private:
         }
     }
     vector<Method> methodList(vector<Method> list) {
-        if (tokenType() == KEYWORD || tokenType() == IDENTIFIER) {
+        if ((tokenType() == KEYWORD || tokenType() == IDENTIFIER) && peek() != "private") {
             list.push_back(method());
             return methodList(list);
         }
