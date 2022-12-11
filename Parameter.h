@@ -16,6 +16,7 @@ private:
     std::string name;
     std::string pointer;
     std::string storedValue;
+    std::string functionPointerParam;
     bool functionPointer = false;
 
 public:
@@ -29,6 +30,9 @@ public:
             : type(type), pointer(pointer), name(name), storedValue(storedValue) {};
     Parameter (std::string type, std::string pointer, std::string name, std::string storedValue, bool funcPointer)
             : type(type), pointer(pointer), name(name), storedValue(storedValue), functionPointer(funcPointer) {};
+
+    Parameter (std::string type, std::string pointer, std::string name, std::string storedValue, bool funcPointer, std::string functionPointerParam)
+            : type(type), pointer(pointer), name(name), storedValue(storedValue), functionPointer(funcPointer), functionPointerParam(functionPointerParam) {};
 
 
     std::string getType() {
@@ -51,7 +55,12 @@ public:
         std::stringstream out;
         if (pointer != "" )
             out << pointer;
-        out << name;
+        if (functionPointer) {
+            out << "(*" << name << ")" << functionPointerParam;
+        }
+        else {
+            out << name;
+        }
         if (storedValue != "") {
             out << " = " << storedValue;
         }
@@ -60,6 +69,12 @@ public:
     }
     std::string printWOTypePointer() const{
         std::stringstream out;
+        /*if (functionPointer) {
+            out << "(*" << name << ")" << functionPointerParam;
+        }
+        else {
+            out << name;
+        }*/
         out << name;
         if (storedValue != "") {
             out << " = " << storedValue;
@@ -70,9 +85,14 @@ public:
     std::string printWType() const{
         std::stringstream out;
         out << type << " ";
-        if (pointer != "" )
+        if (pointer != "" && !functionPointer)
             out << pointer;
-        out << name;
+        if (functionPointer) {
+            out << "(*" << name << ")" << functionPointerParam;
+        }
+        else {
+            out << name;
+        }
 
         return out.str();
     }
@@ -82,7 +102,12 @@ public:
         out << type << " ";
         if (pointer != "" )
             out << pointer;
-        out << name;
+        if (functionPointer) {
+            out << "(*" << name << ")" << functionPointerParam;
+        }
+        else {
+            out << name;
+        }
         if (storedValue != "") {
             out << " = " << storedValue;
         }

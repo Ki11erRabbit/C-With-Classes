@@ -480,18 +480,28 @@ private:
                     pointer += match(OPERATOR);
             }
             if (tokenType() == SPECIALCHAR) {// for function pointers
+                string funcPointParam;
                 match(SPECIALCHAR);
                 match(OPERATOR);
                 varName += match(IDENTIFIER);
                 match(SPECIALCHAR);
 
-                contents = match(SPECIALCHAR);
+                funcPointParam = match(SPECIALCHAR);
                 for (auto token : matchUntil(SPECIALCHAR)) {
-                    contents += token;
+                    funcPointParam += token;
                 }
-                contents += match(SPECIALCHAR);
-                varList.push_back(Parameter(varType,pointer,varName,contents,true));
-                match(SPECIALCHAR);
+                funcPointParam += match(SPECIALCHAR);
+                if (tokenType() == OPERATOR) {
+                    match(OPERATOR);
+                    if (tokenType() == IDENTIFIER) {
+                        contents = match(IDENTIFIER);
+                    }
+                    else if (tokenType() == KEYWORD) {
+                        contents = match(KEYWORD);
+                    }
+                }
+                varList.push_back(Parameter(varType,pointer,varName,contents,true,funcPointParam));
+                match(TERMINATOR);
                 return varList;
             }
             if (tokenType() == IDENTIFIER) {
@@ -1258,7 +1268,7 @@ private:
             }
             match(BRACE);
             match(TERMINATOR);
-            return Class(className, classMembers, classMethods, parentClass);
+            return Class(className, classMembers, classMethods, parentClass,classPrivateMethods);
         }
         else {
             throwError();
