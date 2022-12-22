@@ -27,7 +27,7 @@ class ArrayList {
     void _ArrayList(ArrayList* list) {
         if (list->free != NULL) {
             char *array = (char*)list->list;
-            for (size_t i = 0; i < list->length; i += list->elementSize) {
+            for (size_t i = 0; i < list->length * list->elementSize; i += list->elementSize) {
                 list->free(array);
             }
         }
@@ -37,7 +37,7 @@ class ArrayList {
     void _newArrayList(ArrayList* list) {
         if (list->free != NULL) {
             char *array = (char*)list->list;
-            for (size_t i = 0; i < list->length; i += list->elementSize) {
+            for (size_t i = 0; i < list->length * list->elementSize; i += list->elementSize) {
                 list->free(array);
             }
         }
@@ -58,7 +58,6 @@ class ArrayList {
     }
     private void internal_resize(size_t n) {
         this->list = realloc(this->list,n * this->elementSize);
-        this->length = n;
         this->maxLength = n;
     }
     void resize(size_t n) {
